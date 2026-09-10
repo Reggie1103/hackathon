@@ -12,8 +12,8 @@ El repositorio mantiene dos variantes del producto:
 - Idea validada mediante debate adversarial.
 - Alcance recomendado: atención bilingüe español–inglés con TranslatePsy.
 - La variante monolingüe se conserva para comparar alcance, rendimiento y riesgo.
-- Repositorio preparado para continuar con el flujo de especificación e implementación.
-- Pendiente: conectar un repositorio remoto de GitHub y ejecutar la configuración inicial de The Main Flow.
+- Repositorio conectado a GitHub y preparado para el flujo de especificación e implementación.
+- GitHub Issues está configurado como gestor de especificaciones y tareas.
 
 ## Flujo de trabajo previsto
 
