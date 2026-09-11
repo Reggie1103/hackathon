@@ -61,6 +61,14 @@ Estas tasas distinguen dos resultados: preservar exactamente una entidad y detec
 - Referencia: “My modem shows error E one zero five and the red light does not blink.”
 - Resultado: “My modem shows error E105 and the red light does not blink.”
 
+`npm run smoke:asr-stream` reproduce el mismo audio como fragmentos PCM s16le de 250 ms. `transcribeStream` muestra parciales durante la entrada y, al cerrar, una pasada local sobre el PCM en memoria estabiliza el texto.
+
+- Actualizaciones incrementales: 3.
+- Tiempo total: 7,607 ms, incluyendo 4.7 s de reproducción a velocidad real y la estabilización final.
+- Resultado provisional final del stream: parcial hasta `E1` en esta ejecución.
+- Resultado estabilizado: “My modem shows error E105 and the red light does not blink.”
+- Persistencia de audio: ninguna; el PCM se elimina de memoria al finalizar o cancelar.
+
 ## Flujo completo
 
 `npm run smoke:flow` ejecuta EN → ES → RAG → ES → EN con modelos ya descargados. La ejecución de referencia tardó 7,450 ms incluyendo la carga en frío de los tres modelos involucrados. Después de precarga, la traducción y búsqueda quedan en el orden de cientos y decenas de milisegundos respectivamente.

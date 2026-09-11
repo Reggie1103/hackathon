@@ -105,7 +105,7 @@ El agente ve ambas versiones antes de enviarla o reproducirla. La conversación 
 2. La aplicación precarga los modelos de transcripción, TranslatePsy, embeddings y generación.
 3. Se abre la colección documental correspondiente a la línea de negocio.
 4. El cliente habla en inglés.
-5. QVAC transcribe localmente el audio del cliente.
+5. QVAC transcribe localmente el audio del cliente en streaming y muestra texto provisional mientras habla.
 6. TranslatePsy traduce la intervención estable al español.
 7. Critical Data Lock compara original, transcripción y traducción para proteger entidades críticas.
 8. El sistema construye una consulta RAG en el idioma de la documentación.
@@ -607,7 +607,7 @@ Las entrevistas deben investigar:
 El diseño se cerró con las siguientes decisiones:
 
 1. La demo se ejecutará en un HP Victus con Windows 11, Intel i5-12450H, 16 GB de RAM y NVIDIA RTX 3050 Laptop de 4 GB. El equipo dispone de Vulkan 1.4 y 77.8 GB libres.
-2. El MVP transcribe únicamente la voz en inglés del cliente. Acepta entrada grabada desde el micrófono y la procesa al detener el turno. No intenta separar interlocutores desde un canal mixto.
+2. El MVP transcribe únicamente la voz en inglés del cliente. Envía PCM mono de 16 kHz directamente a `transcribeStream`, muestra resultados incrementales y estabiliza la transcripción con una pasada final local cuando el agente detiene la intervención. El PCM vive solo en memoria durante el stream. No intenta separar interlocutores desde un canal mixto.
 3. Los paquetes de registro `BERGAMOT_EN_ES` y `BERGAMOT_ES_EN` de `@qvac/sdk` 0.19.0 ejecutan inglés → español y español → inglés. Cada modelo principal ocupa 31,561,787 bytes y utiliza el paquete INTGEMM con vocabulario y léxico asociados.
 4. La guía será extractiva primero: presentará fragmentos recuperados y una síntesis breve vinculada a citas. La interfaz seguirá siendo útil si el modelo generativo no está disponible.
 5. Los documentos de conocimiento estarán en español. La consulta del cliente se traducirá al español antes de la recuperación.

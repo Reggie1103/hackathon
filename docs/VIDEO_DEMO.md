@@ -28,11 +28,11 @@ Di:
 
 No navegues fuera de la app. El indicador local y el texto de la franja dan la evidencia visual suficiente.
 
-### 0:45–1:30 — Consulta bilingüe y traducción
+### 0:45–1:30 — Transcripción en vivo y traducción
 
-Lee la consulta inicial en inglés y haz clic en **Procesar turno**. Cuando aparezca la tarjeta de traducción, di:
+Haz clic en **Iniciar transcripción en vivo** y di en inglés: `My modem shows error E one zero five and the red light does not blink.` Mientras hablas, señala cómo aparece el texto provisional. Haz clic en **Detener intervención** y después en **Procesar turno**. Cuando aparezca la tarjeta de traducción, di:
 
-> El cliente reporta el código E105 y que la luz roja no parpadea. El original se conserva para que el agente lo pueda contrastar; TranslatePsy lo presenta inmediatamente en español.
+> Parakeet recibe PCM en fragmentos y transcribe mientras el cliente habla. Al detener la intervención fija el texto; después TranslatePsy lo presenta en español sin enviar el audio a una API externa.
 
 Señala que `E105` y la negación permanecen visibles en ambos idiomas.
 

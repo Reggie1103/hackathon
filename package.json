@@ -16,6 +16,7 @@
     "smoke:rag": "node --experimental-strip-types scripts/smoke-rag.ts",
     "smoke:flow": "node --experimental-strip-types scripts/smoke-flow.ts",
     "smoke:asr": "node --experimental-strip-types scripts/smoke-asr.ts",
+    "smoke:asr-stream": "node --experimental-strip-types scripts/smoke-asr-stream.ts",
     "smoke:runtime": "node --experimental-strip-types scripts/smoke-runtime.ts",
     "evaluate:rag": "node --experimental-strip-types scripts/evaluate-rag.ts",
     "evaluate:bilingual": "node --experimental-strip-types scripts/evaluate-bilingual.ts",

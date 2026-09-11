@@ -8,14 +8,14 @@ La ruta principal de IA se ejecuta en el dispositivo con `@qvac/sdk`. El prototi
 
 ## Qué funciona
 
-- Entrada escrita o grabación del micrófono del cliente.
-- ASR inglés local con Parakeet Unified.
+- Entrada escrita o transcripción incremental del micrófono del cliente.
+- ASR inglés local en streaming con Parakeet Unified: el texto aparece mientras el cliente habla y una pasada final sobre el PCM en memoria estabiliza el resultado al detener el turno.
 - Traducción EN ↔ ES local con los paquetes TranslatePsy/Bergamot de QVAC.
 - RAG local sobre 20 documentos ficticios de telecomunicaciones en español.
 - `Evidence Gate`: solo muestra guías respaldadas por documentos activos y vigentes.
 - `Critical Data Lock`: bloquea una respuesta si cambian códigos, números o negaciones.
 - Confirmación humana obligatoria.
-- Zero-Retention Mode: al cerrar la sesión se elimina el contenido de la interfaz; los archivos temporales de audio se borran incluso si la transcripción falla.
+- Zero-Retention Mode: al cerrar la sesión se elimina el contenido de la interfaz y se destruye cualquier stream de audio activo. El micrófono se envía como PCM directo a QVAC y no se guarda en archivos.
 - Registros JSONL de rendimiento y evaluación reproducible.
 
 ## Requisitos
@@ -27,7 +27,7 @@ La ruta principal de IA se ejecuta en el dispositivo con `@qvac/sdk`. El prototi
 - Al menos 5 GB libres.
 - Micrófono para la captura real.
 
-`ffmpeg` se instala localmente mediante `ffmpeg-static`; no hace falta un gestor de paquetes del sistema.
+`ffmpeg` se instala localmente mediante `ffmpeg-static` para las pruebas reproducibles; la captura en vivo de la aplicación no necesita conversión por archivo.
 
 ## Instalación
 
@@ -64,6 +64,7 @@ npm run build
 npm run smoke:translate
 npm run smoke:rag
 npm run smoke:asr
+npm run smoke:asr-stream
 npm run smoke:runtime
 npm run smoke:flow
 npm run evaluate:rag
@@ -79,7 +80,7 @@ Las pruebas de humo usan contenido ficticio. `npm run smoke:asr` genera voz ingl
 | Traducción EN → ES | `BERGAMOT_EN_ES` | paquete Bergamot INTGEMM | 31,561,787 bytes + companions |
 | Traducción ES → EN | `BERGAMOT_ES_EN` | paquete Bergamot INTGEMM | 31,561,787 bytes + companions |
 | Embeddings RAG | `EMBEDDINGGEMMA_300M_Q4_0` | GGUF Q4_0 | 277,852,192 bytes |
-| ASR inglés | `PARAKEET_UNIFIED_0_6B_Q4_0` | GGUF Q4_0 | 395,029,120 bytes |
+| ASR inglés en streaming | `PARAKEET_UNIFIED_0_6B_Q4_0` | GGUF Q4_0 | 395,029,120 bytes |
 
 Los nombres anteriores son los identificadores reales del registro QVAC. La aplicación no presenta un alias inventado como si fuera el nombre del modelo.
 
@@ -90,6 +91,7 @@ Hardware: HP Victus, Intel i5-12450H, 15.7 GB RAM, NVIDIA RTX 3050 Laptop 4 GB, 
 - Traducción EN → ES: 509 ms; 24 tokens; 50.26 tokens/s. Primera carga con descarga: 16.85 s.
 - Traducción ES → EN: 387 ms; 12 tokens; 32.74 tokens/s. Primera carga con descarga: 8.42 s.
 - ASR Parakeet: 890 ms para un audio sintético de 4.7 s; el código hablado “E one zero five” se transcribió como `E105`.
+- ASR streaming Parakeet: 3 actualizaciones incrementales durante el mismo audio y resultado final estabilizado exacto en 7.61 s, incluyendo reproducción a velocidad real y la pasada final local.
 - RAG caliente: 7–15 ms por consulta después de cargar e indexar.
 - Evaluación RAG: 88.9 % `Precision@1` sobre 18 casos con respuesta y 100 % de abstención sobre dos casos fuera del dominio, con umbral 0.50.
 - Evaluación bilingüe de Critical Data Lock: 20/20 casos con cobertura declarada de entidades y 100 % protegidos (conservados o bloqueados); 90 % preservó todas las entidades de entrada y 85 % las de respuesta sin activar el bloqueo.
@@ -99,7 +101,7 @@ Son mediciones de una ejecución local, no garantías para otro hardware. Los re
 
 ## Límites conocidos
 
-- La captura actual procesa el audio después de detener la grabación. Streaming parcial con fin de turno queda como siguiente mejora.
+- El MVP admite un stream de voz inglesa por ventana. El agente detiene manualmente la intervención para fijar el texto final antes de traducirlo.
 - La colección es ficticia y pequeña; no representa la complejidad de una base empresarial real.
 - El umbral 0.50 se calibró con 20 casos. Requiere recalibración por empresa y colección.
 - TranslatePsy puede producir una traducción gramatical pero poco natural. El agente siempre ve ambos textos y debe aprobar la respuesta.

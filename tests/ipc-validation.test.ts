@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { validateAudioInput, validateTextInput } from "../src/main/ipc-validation.js";
+import {
+  validateAudioInput,
+  validateAudioStreamChunkInput,
+  validateStreamId,
+  validateTextInput,
+} from "../src/main/ipc-validation.js";
 
 describe("IPC validation boundary", () => {
   it("normalizes acceptable text and rejects missing, empty, and oversized values", () => {
@@ -14,5 +19,20 @@ describe("IPC validation boundary", () => {
     expect(validateAudioInput(new ArrayBuffer(32)).byteLength).toBe(32);
     expect(() => validateAudioInput(new ArrayBuffer(0))).toThrow("vacío");
     expect(() => validateAudioInput(new Uint8Array(5))).toThrow("ArrayBuffer");
+  });
+
+  it("accepts ordered PCM stream chunks and rejects malformed chunks", () => {
+    const audio = new ArrayBuffer(3200);
+    expect(validateAudioStreamChunkInput({ streamId: "stream-1", audio })).toEqual({
+      streamId: "stream-1",
+      audio,
+    });
+    expect(() => validateStreamId(42)).toThrow("stream");
+    expect(() =>
+      validateAudioStreamChunkInput({ streamId: "stream-1", audio: new ArrayBuffer(3) }),
+    ).toThrow("muestras completas");
+    expect(() => validateAudioStreamChunkInput({ streamId: "stream-1" })).toThrow(
+      "ArrayBuffer",
+    );
   });
 });

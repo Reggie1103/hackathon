@@ -5,6 +5,7 @@ import type {
   PreparedCustomerResponse,
   RuntimeInfo,
 } from "../../shared/contracts.js";
+import { resampleToPcm16 } from "../../shared/audio-stream.js";
 
 const SAMPLE =
   "My modem shows error E105 and the red light does not blink.";
@@ -19,18 +20,22 @@ export function App() {
   const [agentText, setAgentText] = useState("");
   const [turn, setTurn] = useState<CustomerTurnResult | null>(null);
   const [response, setResponse] = useState<PreparedCustomerResponse | null>(null);
-  const [busy, setBusy] = useState<"turn" | "response" | null>(null);
+  const [busy, setBusy] = useState<"audio" | "turn" | "response" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [runtime, setRuntime] = useState<RuntimeInfo | null>(null);
   const [recording, setRecording] = useState(false);
   const [transcriptionNote, setTranscriptionNote] = useState<string | null>(null);
   const [audioState, setAudioState] = useState<"idle" | "provisional" | "stabilizing" | "stable">("idle");
   const [confirmed, setConfirmed] = useState(false);
-  const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const audioProcessorRef = useRef<ScriptProcessorNode | null>(null);
+  const silentGainRef = useRef<GainNode | null>(null);
+  const audioStreamIdRef = useRef<string | null>(null);
+  const audioWriteQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const audioWriteFailureRef = useRef<unknown>(null);
   const sessionGenerationRef = useRef(0);
-  const discardRecordingRef = useRef(false);
 
   useEffect(() => {
     let active = true;
@@ -51,6 +56,15 @@ export function App() {
       window.clearInterval(interval);
     };
   }, []);
+
+  useEffect(() => window.sovereignAgent.onAudioTranscriptionUpdate((update) => {
+    if (update.streamId !== audioStreamIdRef.current) return;
+    setCustomerText(update.text);
+    setTranscriptionNote(
+      `${update.modelName} · streaming local · ${update.latencyMs} ms`,
+    );
+    setAudioState(update.isFinal ? "stable" : "provisional");
+  }), []);
 
   const isCurrentSession = (generation: number) => generation === sessionGenerationRef.current;
   const runtimeReady = runtime?.status === "ready";
@@ -74,74 +88,140 @@ export function App() {
     }
   };
 
+  const teardownAudioCapture = async () => {
+    if (audioProcessorRef.current) {
+      audioProcessorRef.current.onaudioprocess = null;
+      audioProcessorRef.current.disconnect();
+    }
+    audioSourceRef.current?.disconnect();
+    silentGainRef.current?.disconnect();
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    await audioContextRef.current?.close().catch(() => undefined);
+    audioProcessorRef.current = null;
+    audioSourceRef.current = null;
+    silentGainRef.current = null;
+    audioContextRef.current = null;
+    streamRef.current = null;
+  };
+
+  const finishRecording = async (discard = false) => {
+    const generation = sessionGenerationRef.current;
+    const streamId = audioStreamIdRef.current;
+    audioStreamIdRef.current = null;
+    setRecording(false);
+    if (!discard) setAudioState("stabilizing");
+    await teardownAudioCapture();
+    if (!streamId) return;
+
+    if (discard) {
+      await window.sovereignAgent.cancelCustomerAudioStream(streamId).catch(() => undefined);
+      return;
+    }
+
+    setBusy("audio");
+    try {
+      await audioWriteQueueRef.current;
+      if (audioWriteFailureRef.current) throw audioWriteFailureRef.current;
+      const transcription = await window.sovereignAgent.finishCustomerAudioStream(streamId);
+      if (!isCurrentSession(generation)) return;
+      if (!transcription.text.trim()) throw new Error("No se detectó voz. Intenta hablar más cerca del micrófono.");
+      setCustomerText(transcription.text);
+      setTranscriptionNote(
+        `${transcription.modelName} · streaming local · ${transcription.latencyMs} ms`,
+      );
+      setAudioState("stable");
+    } catch (cause) {
+      await window.sovereignAgent.cancelCustomerAudioStream(streamId).catch(() => undefined);
+      if (isCurrentSession(generation)) {
+        setError(cause instanceof Error ? cause.message : String(cause));
+        setAudioState("idle");
+      }
+    } finally {
+      if (isCurrentSession(generation)) setBusy(null);
+    }
+  };
+
   const toggleRecording = async () => {
-    if (recorderRef.current?.state === "recording") {
-      recorderRef.current.stop();
-      setRecording(false);
-      setAudioState("stabilizing");
+    if (audioStreamIdRef.current) {
+      await finishRecording();
       return;
     }
 
     setError(null);
     setTranscriptionNote(null);
-    setAudioState("provisional");
     const generation = sessionGenerationRef.current;
+    let stream: MediaStream | null = null;
+    let streamId: string | null = null;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true },
+      });
       if (!isCurrentSession(generation)) {
         stream.getTracks().forEach((track) => track.stop());
         return;
       }
-      const recorder = new MediaRecorder(stream);
+      const started = await window.sovereignAgent.startCustomerAudioStream();
+      streamId = started.streamId;
+      if (!isCurrentSession(generation)) {
+        stream.getTracks().forEach((track) => track.stop());
+        await window.sovereignAgent.cancelCustomerAudioStream(streamId);
+        return;
+      }
+
+      const audioContext = new AudioContext({
+        sampleRate: started.sampleRate,
+        latencyHint: "interactive",
+      });
+      await audioContext.resume();
+      const source = audioContext.createMediaStreamSource(stream);
+      const processor = audioContext.createScriptProcessor(4096, 1, 1);
+      const silentGain = audioContext.createGain();
+      silentGain.gain.value = 0;
+
       streamRef.current = stream;
-      recorderRef.current = recorder;
-      chunksRef.current = [];
-      recorder.ondataavailable = (event) => {
-        if (event.data.size > 0) chunksRef.current.push(event.data);
+      audioContextRef.current = audioContext;
+      audioSourceRef.current = source;
+      audioProcessorRef.current = processor;
+      silentGainRef.current = silentGain;
+      audioStreamIdRef.current = streamId;
+      audioWriteQueueRef.current = Promise.resolve();
+      audioWriteFailureRef.current = null;
+      processor.onaudioprocess = (event) => {
+        if (audioStreamIdRef.current !== streamId) return;
+        const audio = resampleToPcm16(
+          event.inputBuffer.getChannelData(0),
+          audioContext.sampleRate,
+          started.sampleRate,
+        );
+        audioWriteQueueRef.current = audioWriteQueueRef.current
+          .then(() => window.sovereignAgent.appendCustomerAudioStream({ streamId: streamId!, audio }))
+          .catch((cause) => {
+            audioWriteFailureRef.current ??= cause;
+          });
       };
-      recorder.onstop = async () => {
-        const generation = sessionGenerationRef.current;
-        const discarded = discardRecordingRef.current;
-        discardRecordingRef.current = false;
-        if (discarded) {
-          streamRef.current?.getTracks().forEach((track) => track.stop());
-          streamRef.current = null;
-          recorderRef.current = null;
-          chunksRef.current = [];
-          return;
-        }
-        setBusy("turn");
-        try {
-          const blob = new Blob(chunksRef.current, { type: recorder.mimeType });
-          const transcription = await window.sovereignAgent.transcribeCustomerAudio(
-            await blob.arrayBuffer(),
-          );
-          if (!isCurrentSession(generation)) return;
-          setCustomerText(transcription.text);
-          setTranscriptionNote(`${transcription.modelName} · ${transcription.latencyMs} ms`);
-          setAudioState("stable");
-        } catch (cause) {
-          if (isCurrentSession(generation)) setError(cause instanceof Error ? cause.message : String(cause));
-        } finally {
-          streamRef.current?.getTracks().forEach((track) => track.stop());
-          streamRef.current = null;
-          recorderRef.current = null;
-          chunksRef.current = [];
-          if (isCurrentSession(generation)) setBusy(null);
-        }
-      };
-      recorder.start();
+      source.connect(processor);
+      processor.connect(silentGain);
+      silentGain.connect(audioContext.destination);
+      setCustomerText("");
+      setTurn(null);
+      setResponse(null);
+      setConfirmed(false);
+      setAudioState("provisional");
       setRecording(true);
     } catch (cause) {
+      stream?.getTracks().forEach((track) => track.stop());
+      if (streamId) await window.sovereignAgent.cancelCustomerAudioStream(streamId).catch(() => undefined);
+      await teardownAudioCapture();
+      audioStreamIdRef.current = null;
+      setRecording(false);
+      setAudioState("idle");
       setError(cause instanceof Error ? cause.message : String(cause));
     }
   };
 
   const closeSession = async () => {
     sessionGenerationRef.current += 1;
-    discardRecordingRef.current = true;
-    if (recorderRef.current?.state === "recording") recorderRef.current.stop();
-    streamRef.current?.getTracks().forEach((track) => track.stop());
+    await finishRecording(true);
     await window.sovereignAgent.closeSession();
     setCustomerText("");
     setAgentText("");
@@ -207,7 +287,7 @@ export function App() {
           <p>Entiende al cliente en inglés, trabaja en español y confirma cada respuesta con conocimiento vigente de la empresa.</p>
         </div>
         <div className="flow-summary">
-          <strong>EN → ES → EVIDENCE → ES → EN</strong>
+          <strong>VOICE STREAM → EN → ES → EVIDENCE → ES → EN</strong>
           <span>{runtime?.disclosure ?? "Verificando el runtime local…"}</span>
         </div>
       </section>
@@ -226,12 +306,12 @@ export function App() {
 
           <label htmlFor="customer">Intervención original</label>
           <button className={`record ${recording ? "active" : ""}`} onClick={toggleRecording} disabled={busy !== null || !runtimeReady}>
-            {recording ? "Detener y transcribir" : "Grabar voz del cliente"}
+            {recording ? "Detener intervención" : "Iniciar transcripción en vivo"}
           </button>
-          {audioState !== "idle" && <small className="transcription-note">{audioState === "provisional" ? "Audio provisional: capturando la intervención." : audioState === "stabilizing" ? "Estabilizando audio antes de transcribir." : "Intervención estable y lista para traducir."}</small>}
+          {audioState !== "idle" && <small className={`transcription-note ${audioState}`}>{audioState === "provisional" ? "● EN VIVO · QVAC transcribe mientras el cliente habla." : audioState === "stabilizing" ? "Cerrando el stream y estabilizando la transcripción." : "Intervención estable y lista para traducir."}</small>}
           {transcriptionNote && <small className="transcription-note">{transcriptionNote}</small>}
-          <textarea id="customer" value={customerText} onChange={(event) => { setCustomerText(event.target.value); setAudioState("stable"); setConfirmed(false); }} />
-          <button className="primary" onClick={processTurn} disabled={busy !== null || !customerText.trim() || !runtimeReady}>
+          <textarea id="customer" value={customerText} readOnly={recording} onChange={(event) => { setCustomerText(event.target.value); setAudioState("stable"); setConfirmed(false); }} />
+          <button className="primary" onClick={processTurn} disabled={busy !== null || recording || !customerText.trim() || !runtimeReady}>
             {busy === "turn" ? "Traduciendo localmente…" : "Procesar turno"}
           </button>
 

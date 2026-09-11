@@ -9,3 +9,4 @@ dist-types/
 
 # Runtime scratch data
 .qvac/
+work/

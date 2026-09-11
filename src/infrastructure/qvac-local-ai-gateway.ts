@@ -13,6 +13,7 @@ import {
   ragSaveEmbeddings,
   ragSearch,
   transcribe,
+  transcribeStream,
   translate,
   unloadModel,
 } from "@qvac/sdk";
@@ -20,6 +21,7 @@ import {
 import type {
   Evidence,
   AudioTranscriptionResult,
+  CustomerAudioTranscriptionStream,
   Language,
   LocalAiGateway,
   TranslationResult,
@@ -100,6 +102,62 @@ export class QvacLocalAiGateway implements LocalAiGateway {
       text: text.trim(),
       modelName: PARAKEET_UNIFIED_0_6B_Q4_0.name,
       latencyMs: Math.round(performance.now() - started),
+    };
+  }
+
+  async createCustomerAudioStream(
+    onUpdate: (result: AudioTranscriptionResult) => void,
+  ): Promise<CustomerAudioTranscriptionStream> {
+    const asrModelId = await this.ensureAsrModel();
+    const started = performance.now();
+    const session = await transcribeStream({
+      modelId: asrModelId,
+      parakeetStreamingConfig: {
+        chunkMs: 500,
+        emitPartials: true,
+      },
+    });
+    let transcript = "";
+    const audioChunks: Buffer[] = [];
+    const result = (async (): Promise<AudioTranscriptionResult> => {
+      try {
+        for await (const event of session) {
+          if (event.type !== "text" || !event.text) continue;
+          transcript += event.text;
+          onUpdate({
+            text: transcript.trimStart(),
+            modelName: PARAKEET_UNIFIED_0_6B_Q4_0.name,
+            latencyMs: Math.round(performance.now() - started),
+          });
+        }
+        await session.stats.catch(() => undefined);
+        const stableText = audioChunks.length > 0
+          ? await transcribe({
+              modelId: asrModelId,
+              audioChunk: Buffer.concat(audioChunks) as never,
+            })
+          : transcript;
+        return {
+          text: stableText.trim(),
+          modelName: PARAKEET_UNIFIED_0_6B_Q4_0.name,
+          latencyMs: Math.round(performance.now() - started),
+        };
+      } finally {
+        audioChunks.length = 0;
+      }
+    })();
+    result.catch(() => undefined);
+    return {
+      write: (audio) => {
+        audioChunks.push(Buffer.from(audio));
+        session.write(audio);
+      },
+      end: () => session.end(),
+      destroy: () => {
+        audioChunks.length = 0;
+        session.destroy();
+      },
+      result,
     };
   }
 

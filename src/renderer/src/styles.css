@@ -44,6 +44,8 @@ label { display: block; margin-bottom: 8px; color: #73777d; font-size: 10px; fon
 .record { margin: 0 0 10px; border: 1px solid #c6d1df; border-radius: 8px; background: #f8fafc; color: #2f5f95; }
 .record.active { border-color: #e7a49b; background: #fff6f4; color: #a54a3d; }
 .transcription-note { display: block; margin: -3px 0 9px; color: #7a8189; font-size: 11px; }
+.transcription-note.provisional { color: #b14235; font-weight: 750; }
+.transcription-note.stabilizing { color: #9d6609; }
 textarea { width: 100%; min-height: 124px; resize: vertical; padding: 14px; border: 1px solid #d9dde1; border-radius: 8px; outline: none; background: #fff; color: #272a2f; line-height: 1.55; }
 textarea:focus { border-color: #5799ef; box-shadow: 0 0 0 3px rgba(39, 126, 237, .12); }
 button { width: 100%; margin-top: 12px; padding: 12px 14px; border: 0; border-radius: 8px; cursor: pointer; font-weight: 800; letter-spacing: .1px; }

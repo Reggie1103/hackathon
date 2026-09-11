@@ -12,6 +12,23 @@ export interface AudioTranscriptionResult {
   latencyMs: number;
 }
 
+export interface AudioStreamStarted {
+  streamId: string;
+  sampleRate: 16_000;
+}
+
+export interface AudioTranscriptionUpdate extends AudioTranscriptionResult {
+  streamId: string;
+  isFinal: boolean;
+}
+
+export interface CustomerAudioTranscriptionStream {
+  write(audio: Uint8Array): void;
+  end(): void;
+  destroy(): void;
+  result: Promise<AudioTranscriptionResult>;
+}
+
 export interface Evidence {
   documentId: string;
   title: string;
@@ -77,7 +94,13 @@ export interface RuntimeInfo {
 }
 
 export interface SovereignAgentApi {
-  transcribeCustomerAudio(audio: ArrayBuffer): Promise<AudioTranscriptionResult>;
+  startCustomerAudioStream(): Promise<AudioStreamStarted>;
+  appendCustomerAudioStream(input: { streamId: string; audio: ArrayBuffer }): Promise<void>;
+  finishCustomerAudioStream(streamId: string): Promise<AudioTranscriptionResult>;
+  cancelCustomerAudioStream(streamId: string): Promise<void>;
+  onAudioTranscriptionUpdate(
+    listener: (update: AudioTranscriptionUpdate) => void,
+  ): () => void;
   processCustomerUtterance(input: { text: string }): Promise<CustomerTurnResult>;
   prepareCustomerResponse(input: { text: string }): Promise<PreparedCustomerResponse>;
   runtimeInfo(): Promise<RuntimeInfo>;

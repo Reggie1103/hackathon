@@ -3,6 +3,7 @@ import { performance } from "node:perf_hooks";
 import type {
   Evidence,
   AudioTranscriptionResult,
+  CustomerAudioTranscriptionStream,
   Language,
   LocalAiGateway,
   TranslationResult,
@@ -43,6 +44,28 @@ export class DemoLocalAiGateway implements LocalAiGateway {
       text: "My modem shows error E105 and the red light does not blink.",
       modelName: "DEMO_DETERMINISTIC_NOT_QVAC",
       latencyMs: 1,
+    };
+  }
+
+  async createCustomerAudioStream(
+    onUpdate: (result: AudioTranscriptionResult) => void,
+  ): Promise<CustomerAudioTranscriptionStream> {
+    const result = {
+      text: "My modem shows error E105 and the red light does not blink.",
+      modelName: "DEMO_DETERMINISTIC_NOT_QVAC",
+      latencyMs: 1,
+    };
+    let emitted = false;
+    return {
+      write: () => {
+        if (!emitted) {
+          emitted = true;
+          onUpdate({ ...result, text: "My modem shows error E105" });
+        }
+      },
+      end: () => undefined,
+      destroy: () => undefined,
+      result: Promise.resolve(result),
     };
   }
 }

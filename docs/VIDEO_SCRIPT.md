@@ -32,19 +32,19 @@ Duración aproximada: 4 minutos y 30 segundos. Habla despacio y muestra la panta
 
 > Imaginemos que un cliente llama porque su módem muestra el error E105 y la luz roja no parpadea. El agente puede ver el mensaje original en inglés y no pierde el contexto del cliente.
 
-**Haz esto:** deja este texto en el campo de cliente:
+**Haz esto:** pulsa **Iniciar transcripción en vivo** y di:
 
 ```text
-My modem shows error E105 and the red light does not blink.
+My modem shows error E one zero five and the red light does not blink.
 ```
 
-Haz clic en **Procesar turno**.
+Señala el texto que aparece mientras hablas. Pulsa **Detener intervención** y luego **Procesar turno**.
 
 ## 1:10 — Traducción y evidencia
 
 **Di esto:**
 
-> TranslatePsy traduce el caso al español localmente. Después, el sistema busca solamente en la base documental de la empresa. Aquí se muestran documentos activos, su versión, vigencia y el fragmento que justifica la recomendación.
+> Parakeet ya transcribió el audio en streaming. TranslatePsy traduce el caso al español localmente. Después, el sistema busca solamente en la base documental de la empresa. Aquí se muestran documentos activos, su versión, vigencia y el fragmento que justifica la recomendación.
 
 **Muestra:** la traducción del panel izquierdo y las tarjetas del panel central.
 

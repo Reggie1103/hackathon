@@ -1,13 +1,8 @@
-import { delimiter, dirname, join } from "node:path";
+import { dirname, join } from "node:path";
 import { mkdir, writeFile } from "node:fs/promises";
-import { rm } from "node:fs/promises";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
 import { randomUUID } from "node:crypto";
-import { tmpdir } from "node:os";
 
 import { app, BrowserWindow, ipcMain, type IpcMainInvokeEvent } from "electron";
-import ffmpegPath from "ffmpeg-static";
 
 import {
   prepareCustomerResponse,
@@ -15,16 +10,23 @@ import {
 } from "../application/support-flow.js";
 import { DemoLocalAiGateway } from "../infrastructure/demo-local-ai-gateway.js";
 import { QvacLocalAiGateway } from "../infrastructure/qvac-local-ai-gateway.js";
-import { validateAudioInput, validateTextInput } from "./ipc-validation.js";
+import type { CustomerAudioTranscriptionStream } from "../shared/contracts.js";
+import {
+  validateAudioStreamChunkInput,
+  validateStreamId,
+  validateTextInput,
+} from "./ipc-validation.js";
 
 const runtimeMode = process.env.QVAC_RUNTIME_MODE === "demo" ? "demo" : "qvac";
-const execFileAsync = promisify(execFile);
-if (ffmpegPath) {
-  process.env.PATH = `${dirname(ffmpegPath)}${delimiter}${process.env.PATH ?? ""}`;
-}
 const gateway = runtimeMode === "qvac" ? new QvacLocalAiGateway() : new DemoLocalAiGateway();
 const trustedWebContentsIds = new Set<number>();
-const temporaryFiles = new Set<string>();
+const activeAudioStreams = new Map<string, {
+  ownerId: number;
+  generation: number;
+  byteLength: number;
+  stream: CustomerAudioTranscriptionStream;
+}>();
+const MAX_STREAM_AUDIO_BYTES = 20 * 1024 * 1024;
 let sessionGeneration = 0;
 let currentTurnDecision: "supported" | "abstained" | "blocked" | null = null;
 let runtimeStatus: "loading" | "ready" | "error" = runtimeMode === "demo" ? "ready" : "loading";
@@ -50,10 +52,12 @@ function assertRuntimeReady(): void {
   if (runtimeStatus !== "ready") throw new Error("QVAC todavía está preparando los componentes locales.");
 }
 
-async function clearTemporaryFiles(): Promise<void> {
-  const paths = [...temporaryFiles];
-  temporaryFiles.clear();
-  await Promise.allSettled(paths.map((path) => rm(path, { force: true })));
+function destroyAudioStreams(ownerId?: number): void {
+  for (const [streamId, entry] of activeAudioStreams) {
+    if (ownerId !== undefined && entry.ownerId !== ownerId) continue;
+    entry.stream.destroy();
+    activeAudioStreams.delete(streamId);
+  }
 }
 
 function createWindow(): void {
@@ -72,7 +76,10 @@ function createWindow(): void {
     },
   });
   trustedWebContentsIds.add(window.webContents.id);
-  window.on("closed", () => trustedWebContentsIds.delete(window.webContents.id));
+  window.on("closed", () => {
+    destroyAudioStreams(window.webContents.id);
+    trustedWebContentsIds.delete(window.webContents.id);
+  });
 
   if (process.env.ELECTRON_RENDERER_URL) {
     void window.loadURL(process.env.ELECTRON_RENDERER_URL);
@@ -114,42 +121,86 @@ app.whenReady().then(() => {
     );
   }
 
-  ipcMain.handle("support:transcribe-audio", async (event, payload: unknown) => {
+  ipcMain.handle("support:start-audio-stream", async (event) => {
     assertTrustedSender(event);
-    const audio = validateAudioInput(payload);
     const generation = sessionGeneration;
     await warmupPromise;
     assertRuntimeReady();
     assertActiveSession(generation);
-    if (gateway instanceof DemoLocalAiGateway) return gateway.transcribeCustomerAudio();
-    if (!ffmpegPath) throw new Error("ffmpeg no está disponible.");
-
-    const sessionId = randomUUID();
-    const sourcePath = join(tmpdir(), `qvac-${sessionId}.webm`);
-    const wavPath = join(tmpdir(), `qvac-${sessionId}.wav`);
-    temporaryFiles.add(sourcePath);
-    temporaryFiles.add(wavPath);
+    if ([...activeAudioStreams.values()].some((entry) => entry.ownerId === event.sender.id)) {
+      throw new Error("Ya existe una transcripción en vivo para esta ventana.");
+    }
+    const streamId = randomUUID();
+    const ownerId = event.sender.id;
+    const stream = await gateway.createCustomerAudioStream((update) => {
+      const current = activeAudioStreams.get(streamId);
+      if (!current || current.generation !== sessionGeneration || event.sender.isDestroyed()) return;
+      event.sender.send("support:transcription-update", {
+        ...update,
+        streamId,
+        isFinal: false,
+      });
+    });
     try {
-      await writeFile(sourcePath, Buffer.from(audio));
-      await execFileAsync(ffmpegPath, [
-        "-y",
-        "-i",
-        sourcePath,
-        "-ar",
-        "16000",
-        "-ac",
-        "1",
-        "-c:a",
-        "pcm_s16le",
-        wavPath,
-      ]);
-      const transcription = await gateway.transcribeCustomerAudio(wavPath);
       assertActiveSession(generation);
-      return transcription;
+      if (event.sender.isDestroyed()) throw new Error("La ventana se cerró durante la preparación.");
+    } catch (cause) {
+      stream.destroy();
+      throw cause;
+    }
+    activeAudioStreams.set(streamId, { ownerId, generation, byteLength: 0, stream });
+    return { streamId, sampleRate: 16_000 as const };
+  });
+  ipcMain.handle("support:append-audio-stream", (event, payload: unknown) => {
+    assertTrustedSender(event);
+    const { streamId, audio } = validateAudioStreamChunkInput(payload);
+    const entry = activeAudioStreams.get(streamId);
+    if (!entry || entry.ownerId !== event.sender.id) {
+      throw new Error("La transcripción en vivo no existe o ya terminó.");
+    }
+    assertActiveSession(entry.generation);
+    entry.byteLength += audio.byteLength;
+    if (entry.byteLength > MAX_STREAM_AUDIO_BYTES) {
+      entry.stream.destroy();
+      activeAudioStreams.delete(streamId);
+      throw new Error("La intervención supera el límite de diez minutos.");
+    }
+    try {
+      entry.stream.write(new Uint8Array(audio));
+    } catch (cause) {
+      entry.stream.destroy();
+      activeAudioStreams.delete(streamId);
+      throw cause;
+    }
+  });
+  ipcMain.handle("support:finish-audio-stream", async (event, payload: unknown) => {
+    assertTrustedSender(event);
+    const streamId = validateStreamId(payload);
+    const entry = activeAudioStreams.get(streamId);
+    if (!entry || entry.ownerId !== event.sender.id) {
+      throw new Error("La transcripción en vivo no existe o ya terminó.");
+    }
+    try {
+      entry.stream.end();
+      const result = await entry.stream.result;
+      assertActiveSession(entry.generation);
+      event.sender.send("support:transcription-update", {
+        ...result,
+        streamId,
+        isFinal: true,
+      });
+      return result;
     } finally {
-      temporaryFiles.delete(sourcePath);
-      temporaryFiles.delete(wavPath);
-      await Promise.allSettled([rm(sourcePath, { force: true }), rm(wavPath, { force: true })]);
+      activeAudioStreams.delete(streamId);
+    }
+  });
+  ipcMain.handle("support:cancel-audio-stream", (event, payload: unknown) => {
+    assertTrustedSender(event);
+    const streamId = validateStreamId(payload);
+    const entry = activeAudioStreams.get(streamId);
+    if (entry?.ownerId === event.sender.id) {
+      entry.stream.destroy();
+      activeAudioStreams.delete(streamId);
     }
   });
   ipcMain.handle("support:customer-turn", async (event, payload: unknown) => {
@@ -183,7 +234,7 @@ app.whenReady().then(() => {
     error: runtimeError,
     disclosure:
       runtimeMode === "qvac"
-        ? "TranslatePsy/Bergamot y RAG se ejecutan localmente con @qvac/sdk. Ninguna API externa de IA procesa el turno."
+        ? "Parakeet streaming, TranslatePsy/Bergamot y RAG se ejecutan localmente con @qvac/sdk. Ninguna API externa de IA procesa el turno."
         : "Modo demostración determinista. No representa inferencia ni métricas reales de QVAC.",
     };
   });
@@ -191,7 +242,7 @@ app.whenReady().then(() => {
     assertTrustedSender(event);
     sessionGeneration += 1;
     currentTurnDecision = null;
-    await clearTemporaryFiles();
+    destroyAudioStreams(event.sender.id);
     return {
       clearedAt: new Date().toISOString(),
       retained: ["aggregate-performance", "anonymous-problem-category"],
@@ -209,5 +260,6 @@ app.on("window-all-closed", () => {
 });
 
 app.on("before-quit", () => {
+  destroyAudioStreams();
   if (gateway instanceof QvacLocalAiGateway) void gateway.dispose();
 });
