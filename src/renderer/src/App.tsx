@@ -8,12 +8,16 @@ import type {
 
 const SAMPLE =
   "My modem shows error E105 and the red light does not blink.";
-const RESPONSE =
-  "Confirme la luz WAN. Si el código E105 continúa después de reiniciar el módem, transfiera el caso a soporte técnico.";
+
+function buildEvidenceDraft(turn: CustomerTurnResult): string {
+  if (turn.kind !== "supported" || !turn.guidance) return "";
+  const steps = turn.guidance.steps.slice(0, 2).map((step) => step.text).join(" ");
+  return `Gracias por informarnos. ${steps}`;
+}
 
 export function App() {
   const [customerText, setCustomerText] = useState(SAMPLE);
-  const [agentText, setAgentText] = useState(RESPONSE);
+  const [agentText, setAgentText] = useState("");
   const [turn, setTurn] = useState<CustomerTurnResult | null>(null);
   const [response, setResponse] = useState<PreparedCustomerResponse | null>(null);
   const [busy, setBusy] = useState<"turn" | "response" | null>(null);
@@ -62,6 +66,7 @@ export function App() {
       const result = await window.sovereignAgent.processCustomerUtterance({ text: customerText });
       if (!isCurrentSession(generation)) return;
       setTurn(result);
+      setAgentText(buildEvidenceDraft(result));
       setAudioState("stable");
     } catch (cause) {
       if (isCurrentSession(generation)) setError(cause instanceof Error ? cause.message : String(cause));
