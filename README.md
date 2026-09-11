@@ -64,8 +64,10 @@ npm run build
 npm run smoke:translate
 npm run smoke:rag
 npm run smoke:asr
+npm run smoke:runtime
 npm run smoke:flow
 npm run evaluate:rag
+npm run evaluate:bilingual
 ```
 
 Las pruebas de humo usan contenido ficticio. `npm run smoke:asr` genera voz inglesa con el sintetizador local de Windows, la convierte a WAV 16 kHz mono y elimina los audios al terminar.
@@ -90,6 +92,7 @@ Hardware: HP Victus, Intel i5-12450H, 15.7 GB RAM, NVIDIA RTX 3050 Laptop 4 GB, 
 - ASR Parakeet: 890 ms para un audio sintético de 4.7 s; el código hablado “E one zero five” se transcribió como `E105`.
 - RAG caliente: 7–15 ms por consulta después de cargar e indexar.
 - Evaluación RAG: 88.9 % `Precision@1` sobre 18 casos con respuesta y 100 % de abstención sobre dos casos fuera del dominio, con umbral 0.50.
+- Evaluación bilingüe de Critical Data Lock: 20/20 casos con cobertura declarada de entidades y 100 % protegidos (conservados o bloqueados); 90 % preservó todas las entidades de entrada y 85 % las de respuesta sin activar el bloqueo.
 - Turno completo en frío con modelos ya descargados: 7.45 s para EN → ES → RAG → ES → EN.
 
 Son mediciones de una ejecución local, no garantías para otro hardware. Los registros completos están en [`artifacts/`](./artifacts/).

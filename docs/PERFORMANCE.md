@@ -38,6 +38,20 @@ Los archivos JSONL conservan intentos fallidos durante el desarrollo porque perm
 
 El dataset es pequeño. Estas cifras sirven como evidencia reproducible del prototipo y no estiman rendimiento en producción.
 
+## Preparación del runtime
+
+`npm run smoke:runtime` carga traducción EN → ES, traducción ES → EN, embeddings y ASR antes de habilitar el flujo. Con los modelos ya descargados, el runtime alcanzó estado `ready` en 7,546 ms. La aplicación muestra `PREPARANDO QVAC` hasta terminar este paso y expone el error si algún componente falla.
+
+## Entidades críticas bilingües
+
+`npm run evaluate:bilingual` ejecuta TranslatePsy en las dos direcciones para los 20 casos y evalúa códigos, números y negaciones con `Critical Data Lock`.
+
+- Cobertura de entidades declaradas: 20/20 = 100 %.
+- Casos protegidos: 20/20 = 100 %. Una modificación se bloquea; no se confirma silenciosamente.
+- Preservación sin bloqueo: 18/20 de entradas EN → ES (90 %) y 17/20 de respuestas ES → EN (85 %).
+
+Estas tasas distinguen dos resultados: preservar exactamente una entidad y detectar una discrepancia para requerir revisión humana. El objetivo de seguridad del MVP es el segundo: preservar o bloquear el 100 %.
+
 ## ASR
 
 `npm run smoke:asr` genera un WAV con voz sintética local, lo convierte a PCM mono 16 kHz y lo transcribe con Parakeet Unified Q4.

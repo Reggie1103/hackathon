@@ -1,5 +1,4 @@
-import { appendFileSync, mkdirSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { resolve } from "node:path";
 import { performance } from "node:perf_hooks";
 
 import {
@@ -7,14 +6,10 @@ import {
   processCustomerUtterance,
 } from "../src/application/support-flow.ts";
 import { QvacLocalAiGateway } from "../src/infrastructure/qvac-local-ai-gateway.ts";
+import { appendJsonlArtifact } from "./artifact-writer.ts";
 
 const outputPath = resolve("artifacts/performance/flow-smoke.jsonl");
 const gateway = new QvacLocalAiGateway();
-
-const writeRecord = (record: Record<string, unknown>): void => {
-  mkdirSync(dirname(outputPath), { recursive: true });
-  appendFileSync(outputPath, `${JSON.stringify(record)}\n`, "utf8");
-};
 
 try {
   const started = performance.now();
@@ -30,6 +25,7 @@ try {
       text: "Confirme la luz WAN. Si el código E105 continúa después de reiniciar el módem, transfiera el caso a soporte técnico.",
     },
     gateway,
+    turn.kind,
   );
   const endToEndLatencyMs = Math.round(performance.now() - started);
   const record = {
@@ -49,12 +45,12 @@ try {
     endToEndLatencyMs,
     inferenceLocation: "local",
   };
-  writeRecord(record);
+  appendJsonlArtifact(outputPath, record);
   console.log(JSON.stringify(record, null, 2));
   if (turn.kind !== "supported" || !response.canConfirm) process.exitCode = 1;
 } catch (error) {
   const message = error instanceof Error ? error.stack ?? error.message : String(error);
-  writeRecord({ recordedAt: new Date().toISOString(), component: "bilingual-turn", status: "failed", error: message });
+  appendJsonlArtifact(outputPath, { recordedAt: new Date().toISOString(), component: "bilingual-turn", status: "failed", error: message });
   console.error(message);
   process.exitCode = 1;
 } finally {

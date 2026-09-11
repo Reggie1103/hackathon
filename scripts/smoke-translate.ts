@@ -1,5 +1,4 @@
-import { appendFileSync, mkdirSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { resolve } from "node:path";
 import { performance } from "node:perf_hooks";
 
 import {
@@ -10,6 +9,7 @@ import {
   translate,
   unloadModel,
 } from "@qvac/sdk";
+import { appendJsonlArtifact } from "./artifact-writer.ts";
 
 interface SmokeCase {
   direction: "en-es" | "es-en";
@@ -37,11 +37,6 @@ const cases: SmokeCase[] = [
     model: BERGAMOT_ES_EN,
   },
 ];
-
-const writeRecord = (record: Record<string, unknown>): void => {
-  mkdirSync(dirname(outputPath), { recursive: true });
-  appendFileSync(outputPath, `${JSON.stringify(record)}\n`, "utf8");
-};
 
 async function runCase(smokeCase: SmokeCase): Promise<void> {
   let lastProgress = -10;
@@ -95,7 +90,7 @@ async function runCase(smokeCase: SmokeCase): Promise<void> {
       inferenceLocation: "local",
     };
 
-    writeRecord(record);
+    appendJsonlArtifact(outputPath, record);
     console.log(`\n${smokeCase.direction}: ${smokeCase.input}`);
     console.log(`=> ${translatedText}`);
     console.log(`load=${record.loadTimeMs}ms translate=${record.translationLatencyMs}ms`);
@@ -111,7 +106,7 @@ try {
   console.log(`\nPerformance records: ${outputPath}`);
 } catch (error) {
   const message = error instanceof Error ? error.stack ?? error.message : String(error);
-  writeRecord({
+  appendJsonlArtifact(outputPath, {
     recordedAt: new Date().toISOString(),
     component: "translation",
     status: "failed",

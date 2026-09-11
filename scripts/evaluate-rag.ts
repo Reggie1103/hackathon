@@ -15,7 +15,7 @@ const activeIds = new Set(
 try {
   const results = [];
   for (const evaluationCase of ragEvaluationCases) {
-    const matches = await gateway.search(evaluationCase.query, 3);
+    const matches = await gateway.search(evaluationCase.referenceTranslationEs, 12);
     const accepted = matches.find(
       (match) => activeIds.has(match.documentId) && match.score >= DEFAULT_EVIDENCE_THRESHOLD,
     );

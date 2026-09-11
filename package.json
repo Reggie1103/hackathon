@@ -16,7 +16,9 @@
     "smoke:rag": "node --experimental-strip-types scripts/smoke-rag.ts",
     "smoke:flow": "node --experimental-strip-types scripts/smoke-flow.ts",
     "smoke:asr": "node --experimental-strip-types scripts/smoke-asr.ts",
+    "smoke:runtime": "node --experimental-strip-types scripts/smoke-runtime.ts",
     "evaluate:rag": "node --experimental-strip-types scripts/evaluate-rag.ts",
+    "evaluate:bilingual": "node --experimental-strip-types scripts/evaluate-bilingual.ts",
     "capture:ui": "node scripts/capture-ui.mjs"
   },
   "engines": {

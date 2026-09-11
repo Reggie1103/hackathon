@@ -78,7 +78,7 @@ export async function processCustomerUtterance(
   }
 
   const now = input.now ?? new Date();
-  const evidence = (await gateway.search(translation.text, 3))
+  const evidence = (await gateway.search(translation.text, 12))
     .filter((item) => isUsableEvidence(item, now, evidenceThreshold))
     .sort((left, right) => right.score - left.score)
     .slice(0, 3);
@@ -110,15 +110,24 @@ export async function processCustomerUtterance(
 export async function prepareCustomerResponse(
   input: { text: string },
   gateway: LocalAiGateway,
+  turnDecision: CustomerTurnResult["kind"] | null,
 ): Promise<PreparedCustomerResponse> {
   const translation = await gateway.translate(input.text, "es", "en");
   const criticalEntityState = compareCriticalEntities(input.text, translation.text);
+
+  const evidenceState = turnDecision === "supported" ? "supported" : "blocked";
+  const blockedReason =
+    evidenceState === "blocked"
+      ? "Evidence Gate está cerrado. Procese una consulta con evidencia vigente antes de confirmar."
+      : undefined;
 
   return {
     agentText: input.text,
     customerText: translation.text,
     translation,
     criticalEntityState,
-    canConfirm: criticalEntityState.kind === "valid",
+    evidenceState,
+    blockedReason,
+    canConfirm: evidenceState === "supported" && criticalEntityState.kind === "valid",
   };
 }

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import type {
   CustomerTurnResult,
   PreparedCustomerResponse,
+  RuntimeInfo,
 } from "../../shared/contracts.js";
 
 const SAMPLE =
@@ -17,27 +18,55 @@ export function App() {
   const [response, setResponse] = useState<PreparedCustomerResponse | null>(null);
   const [busy, setBusy] = useState<"turn" | "response" | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [runtime, setRuntime] = useState<{ mode: "qvac" | "demo"; disclosure: string } | null>(null);
+  const [runtime, setRuntime] = useState<RuntimeInfo | null>(null);
   const [recording, setRecording] = useState(false);
   const [transcriptionNote, setTranscriptionNote] = useState<string | null>(null);
+  const [audioState, setAudioState] = useState<"idle" | "provisional" | "stabilizing" | "stable">("idle");
+  const [confirmed, setConfirmed] = useState(false);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const sessionGenerationRef = useRef(0);
+  const discardRecordingRef = useRef(false);
 
   useEffect(() => {
-    void window.sovereignAgent.runtimeInfo().then(setRuntime);
+    let active = true;
+    const refresh = async () => {
+      try {
+        const info = await window.sovereignAgent.runtimeInfo();
+        if (!active) return;
+        setRuntime(info);
+        if (info.status === "error") setError(info.error ?? "QVAC no pudo prepararse.");
+      } catch (cause) {
+        if (active) setError(cause instanceof Error ? cause.message : String(cause));
+      }
+    };
+    void refresh();
+    const interval = window.setInterval(() => void refresh(), 1_000);
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
   }, []);
 
+  const isCurrentSession = (generation: number) => generation === sessionGenerationRef.current;
+  const runtimeReady = runtime?.status === "ready";
+
   const processTurn = async () => {
+    const generation = sessionGenerationRef.current;
     setBusy("turn");
     setError(null);
     setResponse(null);
+    setConfirmed(false);
     try {
-      setTurn(await window.sovereignAgent.processCustomerUtterance({ text: customerText }));
+      const result = await window.sovereignAgent.processCustomerUtterance({ text: customerText });
+      if (!isCurrentSession(generation)) return;
+      setTurn(result);
+      setAudioState("stable");
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
+      if (isCurrentSession(generation)) setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
-      setBusy(null);
+      if (isCurrentSession(generation)) setBusy(null);
     }
   };
 
@@ -45,13 +74,20 @@ export function App() {
     if (recorderRef.current?.state === "recording") {
       recorderRef.current.stop();
       setRecording(false);
+      setAudioState("stabilizing");
       return;
     }
 
     setError(null);
     setTranscriptionNote(null);
+    setAudioState("provisional");
+    const generation = sessionGenerationRef.current;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (!isCurrentSession(generation)) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
       const recorder = new MediaRecorder(stream);
       streamRef.current = stream;
       recorderRef.current = recorder;
@@ -60,22 +96,34 @@ export function App() {
         if (event.data.size > 0) chunksRef.current.push(event.data);
       };
       recorder.onstop = async () => {
+        const generation = sessionGenerationRef.current;
+        const discarded = discardRecordingRef.current;
+        discardRecordingRef.current = false;
+        if (discarded) {
+          streamRef.current?.getTracks().forEach((track) => track.stop());
+          streamRef.current = null;
+          recorderRef.current = null;
+          chunksRef.current = [];
+          return;
+        }
         setBusy("turn");
         try {
           const blob = new Blob(chunksRef.current, { type: recorder.mimeType });
           const transcription = await window.sovereignAgent.transcribeCustomerAudio(
             await blob.arrayBuffer(),
           );
+          if (!isCurrentSession(generation)) return;
           setCustomerText(transcription.text);
           setTranscriptionNote(`${transcription.modelName} · ${transcription.latencyMs} ms`);
+          setAudioState("stable");
         } catch (cause) {
-          setError(cause instanceof Error ? cause.message : String(cause));
+          if (isCurrentSession(generation)) setError(cause instanceof Error ? cause.message : String(cause));
         } finally {
           streamRef.current?.getTracks().forEach((track) => track.stop());
           streamRef.current = null;
           recorderRef.current = null;
           chunksRef.current = [];
-          setBusy(null);
+          if (isCurrentSession(generation)) setBusy(null);
         }
       };
       recorder.start();
@@ -86,7 +134,9 @@ export function App() {
   };
 
   const closeSession = async () => {
-    recorderRef.current?.stop();
+    sessionGenerationRef.current += 1;
+    discardRecordingRef.current = true;
+    if (recorderRef.current?.state === "recording") recorderRef.current.stop();
     streamRef.current?.getTracks().forEach((track) => track.stop());
     await window.sovereignAgent.closeSession();
     setCustomerText("");
@@ -94,18 +144,25 @@ export function App() {
     setTurn(null);
     setResponse(null);
     setError(null);
+    setRecording(false);
+    setBusy(null);
+    setAudioState("idle");
+    setConfirmed(false);
     setTranscriptionNote("Sesión cerrada: audio, transcripción y traducciones eliminados.");
   };
 
   const prepareResponse = async () => {
+    const generation = sessionGenerationRef.current;
     setBusy("response");
     setError(null);
+    setConfirmed(false);
     try {
-      setResponse(await window.sovereignAgent.prepareCustomerResponse({ text: agentText }));
+      const result = await window.sovereignAgent.prepareCustomerResponse({ text: agentText });
+      if (isCurrentSession(generation)) setResponse(result);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
+      if (isCurrentSession(generation)) setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
-      setBusy(null);
+      if (isCurrentSession(generation)) setBusy(null);
     }
   };
 
@@ -117,9 +174,13 @@ export function App() {
           <p className="eyebrow">PRIVATE EDGE INTELLIGENCE</p>
           <h1>QVAC Sovereign Agent</h1>
         </div>
-        <div className={`runtime ${runtime?.mode ?? "loading"}`}>
+        <div className={`runtime ${runtime?.mode ?? "loading"} ${runtime?.status ?? "loading"}`}>
           <span className="pulse" />
-          {runtime ? (runtime.mode === "qvac" ? "QVAC LOCAL" : "DEMO MODE") : "PREPARANDO"}
+          {!runtime || runtime.status === "loading"
+            ? "PREPARANDO QVAC"
+            : runtime.status === "error"
+              ? "QVAC ERROR"
+              : runtime.mode === "qvac" ? "QVAC LOCAL" : "DEMO MODE"}
         </div>
       </header>
 
@@ -141,12 +202,13 @@ export function App() {
           </div>
 
           <label htmlFor="customer">Intervención original</label>
-          <button className={`record ${recording ? "active" : ""}`} onClick={toggleRecording} disabled={busy !== null}>
+          <button className={`record ${recording ? "active" : ""}`} onClick={toggleRecording} disabled={busy !== null || !runtimeReady}>
             {recording ? "Detener y transcribir" : "Grabar voz del cliente"}
           </button>
+          {audioState !== "idle" && <small className="transcription-note">{audioState === "provisional" ? "Audio provisional: capturando la intervención." : audioState === "stabilizing" ? "Estabilizando audio antes de transcribir." : "Intervención estable y lista para traducir."}</small>}
           {transcriptionNote && <small className="transcription-note">{transcriptionNote}</small>}
-          <textarea id="customer" value={customerText} onChange={(event) => setCustomerText(event.target.value)} />
-          <button className="primary" onClick={processTurn} disabled={busy !== null || !customerText.trim()}>
+          <textarea id="customer" value={customerText} onChange={(event) => { setCustomerText(event.target.value); setAudioState("stable"); setConfirmed(false); }} />
+          <button className="primary" onClick={processTurn} disabled={busy !== null || !customerText.trim() || !runtimeReady}>
             {busy === "turn" ? "Traduciendo localmente…" : "Procesar turno"}
           </button>
 
@@ -206,8 +268,9 @@ export function App() {
             <span className="language">ES → EN</span>
           </div>
           <label htmlFor="agent">Redacta o ajusta en español</label>
-          <textarea id="agent" value={agentText} onChange={(event) => setAgentText(event.target.value)} />
-          <button className="secondary" onClick={prepareResponse} disabled={busy !== null || !agentText.trim()}>
+          <textarea id="agent" value={agentText} onChange={(event) => { setAgentText(event.target.value); setConfirmed(false); }} />
+          {turn?.kind !== "supported" && <div className="abstention"><strong>Evidence Gate cerrado</strong><p>Primero procesa una consulta respaldada por evidencia vigente.</p></div>}
+          <button className="secondary" onClick={prepareResponse} disabled={busy !== null || !agentText.trim() || !runtimeReady || turn?.kind !== "supported"}>
             {busy === "response" ? "Validando…" : "Traducir y validar"}
           </button>
 
@@ -218,7 +281,8 @@ export function App() {
               <div className={response.canConfirm ? "lock valid" : "lock blocked"}>
                 {response.canConfirm ? "Critical Data Lock · VALID" : "Critical Data Lock · BLOCKED"}
               </div>
-              <button className="confirm" disabled={!response.canConfirm}>Confirmar respuesta</button>
+              {!response.canConfirm && <small className="transcription-note">{response.blockedReason ?? "Revise las entidades críticas antes de confirmar."}</small>}
+              <button className="confirm" disabled={!response.canConfirm || confirmed} onClick={() => setConfirmed(true)}>{confirmed ? "Respuesta confirmada por el agente" : "Confirmar respuesta"}</button>
             </div>
           )}
         </section>

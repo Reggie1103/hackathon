@@ -6,7 +6,7 @@ import { promisify } from "node:util";
 import { randomUUID } from "node:crypto";
 import { tmpdir } from "node:os";
 
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, type IpcMainInvokeEvent } from "electron";
 import ffmpegPath from "ffmpeg-static";
 
 import {
@@ -15,6 +15,7 @@ import {
 } from "../application/support-flow.js";
 import { DemoLocalAiGateway } from "../infrastructure/demo-local-ai-gateway.js";
 import { QvacLocalAiGateway } from "../infrastructure/qvac-local-ai-gateway.js";
+import { validateAudioInput, validateTextInput } from "./ipc-validation.js";
 
 const runtimeMode = process.env.QVAC_RUNTIME_MODE === "demo" ? "demo" : "qvac";
 const execFileAsync = promisify(execFile);
@@ -22,6 +23,38 @@ if (ffmpegPath) {
   process.env.PATH = `${dirname(ffmpegPath)}${delimiter}${process.env.PATH ?? ""}`;
 }
 const gateway = runtimeMode === "qvac" ? new QvacLocalAiGateway() : new DemoLocalAiGateway();
+const trustedWebContentsIds = new Set<number>();
+const temporaryFiles = new Set<string>();
+let sessionGeneration = 0;
+let currentTurnDecision: "supported" | "abstained" | "blocked" | null = null;
+let runtimeStatus: "loading" | "ready" | "error" = runtimeMode === "demo" ? "ready" : "loading";
+let runtimeError: string | undefined;
+let warmupPromise: Promise<void> = Promise.resolve();
+
+function assertTrustedSender(event: IpcMainInvokeEvent): void {
+  if (!trustedWebContentsIds.has(event.sender.id)) {
+    throw new Error("Solicitud IPC rechazada: origen no autorizado.");
+  }
+}
+
+function assertActiveSession(generation: number): void {
+  if (generation !== sessionGeneration) {
+    throw new Error("La sesión se cerró antes de completar la operación.");
+  }
+}
+
+function assertRuntimeReady(): void {
+  if (runtimeStatus === "error") {
+    throw new Error(`QVAC no está disponible: ${runtimeError ?? "error durante la preparación"}`);
+  }
+  if (runtimeStatus !== "ready") throw new Error("QVAC todavía está preparando los componentes locales.");
+}
+
+async function clearTemporaryFiles(): Promise<void> {
+  const paths = [...temporaryFiles];
+  temporaryFiles.clear();
+  await Promise.allSettled(paths.map((path) => rm(path, { force: true })));
+}
 
 function createWindow(): void {
   const window = new BrowserWindow({
@@ -38,6 +71,8 @@ function createWindow(): void {
       sandbox: true,
     },
   });
+  trustedWebContentsIds.add(window.webContents.id);
+  window.on("closed", () => trustedWebContentsIds.delete(window.webContents.id));
 
   if (process.env.ELECTRON_RENDERER_URL) {
     void window.loadURL(process.env.ELECTRON_RENDERER_URL);
@@ -67,13 +102,33 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
-  ipcMain.handle("support:transcribe-audio", async (_event, audio: ArrayBuffer) => {
+  if (gateway instanceof QvacLocalAiGateway) {
+    warmupPromise = gateway.warmup().then(
+      () => {
+        runtimeStatus = "ready";
+      },
+      (cause: unknown) => {
+        runtimeStatus = "error";
+        runtimeError = cause instanceof Error ? cause.message : String(cause);
+      },
+    );
+  }
+
+  ipcMain.handle("support:transcribe-audio", async (event, payload: unknown) => {
+    assertTrustedSender(event);
+    const audio = validateAudioInput(payload);
+    const generation = sessionGeneration;
+    await warmupPromise;
+    assertRuntimeReady();
+    assertActiveSession(generation);
     if (gateway instanceof DemoLocalAiGateway) return gateway.transcribeCustomerAudio();
     if (!ffmpegPath) throw new Error("ffmpeg no está disponible.");
 
     const sessionId = randomUUID();
     const sourcePath = join(tmpdir(), `qvac-${sessionId}.webm`);
     const wavPath = join(tmpdir(), `qvac-${sessionId}.wav`);
+    temporaryFiles.add(sourcePath);
+    temporaryFiles.add(wavPath);
     try {
       await writeFile(sourcePath, Buffer.from(audio));
       await execFileAsync(ffmpegPath, [
@@ -88,31 +143,60 @@ app.whenReady().then(() => {
         "pcm_s16le",
         wavPath,
       ]);
-      return await gateway.transcribeCustomerAudio(wavPath);
+      const transcription = await gateway.transcribeCustomerAudio(wavPath);
+      assertActiveSession(generation);
+      return transcription;
     } finally {
-      await Promise.all([
-        rm(sourcePath, { force: true }),
-        rm(wavPath, { force: true }),
-      ]);
+      temporaryFiles.delete(sourcePath);
+      temporaryFiles.delete(wavPath);
+      await Promise.allSettled([rm(sourcePath, { force: true }), rm(wavPath, { force: true })]);
     }
   });
-  ipcMain.handle("support:customer-turn", (_event, input: { text: string }) =>
-    processCustomerUtterance(input, gateway),
-  );
-  ipcMain.handle("support:prepare-response", (_event, input: { text: string }) =>
-    prepareCustomerResponse(input, gateway),
-  );
-  ipcMain.handle("support:runtime-info", () => ({
+  ipcMain.handle("support:customer-turn", async (event, payload: unknown) => {
+    assertTrustedSender(event);
+    const input = validateTextInput(payload);
+    const generation = sessionGeneration;
+    await warmupPromise;
+    assertRuntimeReady();
+    assertActiveSession(generation);
+    const result = await processCustomerUtterance(input, gateway);
+    assertActiveSession(generation);
+    currentTurnDecision = result.kind;
+    return result;
+  });
+  ipcMain.handle("support:prepare-response", async (event, payload: unknown) => {
+    assertTrustedSender(event);
+    const input = validateTextInput(payload);
+    const generation = sessionGeneration;
+    await warmupPromise;
+    assertRuntimeReady();
+    assertActiveSession(generation);
+    const result = await prepareCustomerResponse(input, gateway, currentTurnDecision);
+    assertActiveSession(generation);
+    return result;
+  });
+  ipcMain.handle("support:runtime-info", (event) => {
+    assertTrustedSender(event);
+    return {
     mode: runtimeMode,
+    status: runtimeStatus,
+    error: runtimeError,
     disclosure:
       runtimeMode === "qvac"
         ? "TranslatePsy/Bergamot y RAG se ejecutan localmente con @qvac/sdk. Ninguna API externa de IA procesa el turno."
         : "Modo demostración determinista. No representa inferencia ni métricas reales de QVAC.",
-  }));
-  ipcMain.handle("support:close-session", () => ({
-    clearedAt: new Date().toISOString(),
-    retained: ["aggregate-performance", "anonymous-problem-category"],
-  }));
+    };
+  });
+  ipcMain.handle("support:close-session", async (event) => {
+    assertTrustedSender(event);
+    sessionGeneration += 1;
+    currentTurnDecision = null;
+    await clearTemporaryFiles();
+    return {
+      clearedAt: new Date().toISOString(),
+      retained: ["aggregate-performance", "anonymous-problem-category"],
+    };
+  });
 
   createWindow();
   app.on("activate", () => {

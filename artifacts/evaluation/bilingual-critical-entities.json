@@ -1,0 +1,659 @@
+{
+  "recordedAt": "2026-09-11T02:11:08.295Z",
+  "runtime": "@qvac/sdk@0.19.0",
+  "models": [
+    "BERGAMOT_EN_ES",
+    "BERGAMOT_ES_EN"
+  ],
+  "caseCount": 20,
+  "declaredEntityCoverage": 1,
+  "protectedRate": 1,
+  "preservedCustomerRate": 0.9,
+  "preservedResponseRate": 0.85,
+  "passedTarget": true,
+  "results": [
+    {
+      "id": "RAG-01",
+      "expectedCriticalEntities": [
+        "10",
+        "1001"
+      ],
+      "customer": {
+        "input": "My internet disconnects every 10 minutes and ticket 1001 reports a red modem light.",
+        "output": "Mi Internet se desconecta cada 10 minutos y el boleto 1001 reporta una lápida de módem roja.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "10",
+            "1001"
+          ]
+        }
+      },
+      "response": {
+        "input": "Para el ticket 1001, confirme la luz roja y escale si continúa por más de 10 minutos.",
+        "output": "For ticket 1001, confirm the red light and climb if you continue for more than 10 minutes.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "10",
+            "1001"
+          ]
+        }
+      },
+      "declaredEntitiesFound": true,
+      "protectedByLock": true,
+      "responseProtectedByLock": true
+    },
+    {
+      "id": "RAG-02",
+      "expectedCriticalEntities": [
+        "1002"
+      ],
+      "customer": {
+        "input": "How do I safely restart modem model AX20 after case 1002?",
+        "output": "¿Cómo reinicio de forma segura módem modelo AX20 después del caso 1002?",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1002",
+            "AX20"
+          ]
+        }
+      },
+      "response": {
+        "input": "Para el caso 1002, reinicie el módem AX20 siguiendo el procedimiento seguro.",
+        "output": "For case 1002, restart the AX20 modem following the safe procedure.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1002",
+            "AX20"
+          ]
+        }
+      },
+      "declaredEntitiesFound": true,
+      "protectedByLock": true,
+      "responseProtectedByLock": true
+    },
+    {
+      "id": "RAG-03",
+      "expectedCriticalEntities": [
+        "F-03",
+        "1003"
+      ],
+      "customer": {
+        "input": "The LOS light is red and fiber cable F-03 is loose in incident 1003.",
+        "output": "La luz LOS es roja y el cable de fibra F-03 está flojo en el incidente 1003.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1003",
+            "F-03"
+          ]
+        }
+      },
+      "response": {
+        "input": "No manipule el cable F-03; programe revisión para el incidente 1003.",
+        "output": "Don't manipulate the F-03 cable; schedule review for incident 1003.",
+        "lock": {
+          "kind": "blocked",
+          "missing": [
+            "NEGATION"
+          ],
+          "unexpected": []
+        }
+      },
+      "declaredEntitiesFound": true,
+      "protectedByLock": true,
+      "responseProtectedByLock": true
+    },
+    {
+      "id": "RAG-04",
+      "expectedCriticalEntities": [
+        "4",
+        "1004"
+      ],
+      "customer": {
+        "input": "Wi-Fi signal does not reach room 4 with router R4, case 1004.",
+        "output": "La señal Wi-Fi no llega a la sala 4 con router R4, caja 1004.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1004",
+            "4",
+            "NEGATION"
+          ]
+        }
+      },
+      "response": {
+        "input": "Para el caso 1004, acerque el router R4 a la habitación 4.",
+        "output": "For case 1004, bring the router R4 closer to room 4.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1004",
+            "4"
+          ]
+        }
+      },
+      "declaredEntitiesFound": true,
+      "protectedByLock": true,
+      "responseProtectedByLock": true
+    },
+    {
+      "id": "RAG-05",
+      "expectedCriticalEntities": [
+        "1005"
+      ],
+      "customer": {
+        "input": "I forgot my Wi-Fi password for network 5G-1005 and need to change it.",
+        "output": "Olvidé mi contraseña Wi-Fi para la red 5G-1005 y necesito cambiarla.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1005"
+          ]
+        }
+      },
+      "response": {
+        "input": "Verifique identidad antes de cambiar la clave de la red 5G-1005.",
+        "output": "Verify identity before changing the 5G-1005 network key.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1005"
+          ]
+        }
+      },
+      "declaredEntitiesFound": true,
+      "protectedByLock": true,
+      "responseProtectedByLock": true
+    },
+    {
+      "id": "RAG-06",
+      "expectedCriticalEntities": [
+        "500",
+        "1006",
+        "80"
+      ],
+      "customer": {
+        "input": "I pay for 500 Mbps but wired test on ticket 1006 shows only 80 Mbps.",
+        "output": "Pago 500 Mbps, pero la prueba por cable en el boleto 1006 muestra solo 80 Mbps.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1006",
+            "500",
+            "80"
+          ]
+        }
+      },
+      "response": {
+        "input": "Para el ticket 1006, mida por cable: el plan es 500 Mbps y el resultado fue 80 Mbps.",
+        "output": "For ticket 1006, cable measure: the plan is 500 Mbps and the result was 80 Mbps.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1006",
+            "500",
+            "80"
+          ]
+        }
+      },
+      "declaredEntitiesFound": true,
+      "protectedByLock": true,
+      "responseProtectedByLock": true
+    },
+    {
+      "id": "RAG-07",
+      "expectedCriticalEntities": [
+        "Z-07",
+        "1007"
+      ],
+      "customer": {
+        "input": "Is scheduled maintenance planned today for zone Z-07, reference 1007?",
+        "output": "¿El mantenimiento programado está previsto hoy para la zona Z-07, referencia 1007?",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1007",
+            "Z-07"
+          ]
+        }
+      },
+      "response": {
+        "input": "Revise el estado de la zona Z-07 para la referencia 1007.",
+        "output": "Check the status of zone Z-07 for reference 1007.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1007",
+            "Z-07"
+          ]
+        }
+      },
+      "declaredEntitiesFound": true,
+      "protectedByLock": true,
+      "responseProtectedByLock": true
+    },
+    {
+      "id": "RAG-08",
+      "expectedCriticalEntities": [
+        "1008"
+      ],
+      "customer": {
+        "input": "Remote tests are complete and I need a technical visit for ticket 1008.",
+        "output": "Las pruebas remotas están completas y necesito una visita técnica para la entrada 1008.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1008"
+          ]
+        }
+      },
+      "response": {
+        "input": "Agende la visita técnica para el ticket 1008.",
+        "output": "Schedule the technical visit for ticket 1008.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1008"
+          ]
+        }
+      },
+      "declaredEntitiesFound": true,
+      "protectedByLock": true,
+      "responseProtectedByLock": true
+    },
+    {
+      "id": "RAG-09",
+      "expectedCriticalEntities": [
+        "C-09",
+        "1009"
+      ],
+      "customer": {
+        "input": "Service failed after a storm on circuit C-09, incident 1009.",
+        "output": "El servicio fracasó después de una tormenta en el circuito C-09, incidente 1009.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1009",
+            "C-09"
+          ]
+        }
+      },
+      "response": {
+        "input": "Priorice la inspección del circuito C-09 para el incidente 1009.",
+        "output": "Prioritize C-09 circuit inspection for incident 1009.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1009",
+            "C-09"
+          ]
+        }
+      },
+      "declaredEntitiesFound": true,
+      "protectedByLock": true,
+      "responseProtectedByLock": true
+    },
+    {
+      "id": "RAG-10",
+      "expectedCriticalEntities": [
+        "2",
+        "1010"
+      ],
+      "customer": {
+        "input": "Only laptop L10 cannot connect; the other 2 devices work, case 1010.",
+        "output": "Solo la computadora portátil L10 no se puede conectar; los otros 2 dispositivos funcionan, caja 1010.",
+        "lock": {
+          "kind": "blocked",
+          "missing": [],
+          "unexpected": [
+            "NEGATION"
+          ]
+        }
+      },
+      "response": {
+        "input": "Para el caso 1010, revise la conexión de la laptop L10; los otros 2 equipos sí funcionan.",
+        "output": "For case 1010, check the L10 laptop connection; the other 2 computers do work.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1010",
+            "2",
+            "L10"
+          ]
+        }
+      },
+      "declaredEntitiesFound": true,
+      "protectedByLock": true,
+      "responseProtectedByLock": true
+    },
+    {
+      "id": "RAG-11",
+      "expectedCriticalEntities": [
+        "NEGATION",
+        "1011"
+      ],
+      "customer": {
+        "input": "No phone or computer in house H11 has internet, incident 1011.",
+        "output": "Ningún teléfono o computadora en la casa H11 tiene internet, incidente 1011.",
+        "lock": {
+          "kind": "blocked",
+          "missing": [
+            "NEGATION"
+          ],
+          "unexpected": []
+        }
+      },
+      "response": {
+        "input": "Para el incidente 1011, confirme que ningún equipo de la casa H11 tiene servicio.",
+        "output": "For incident 1011, confirm that no H11 home equipment has service.",
+        "lock": {
+          "kind": "blocked",
+          "missing": [],
+          "unexpected": [
+            "NEGATION"
+          ]
+        }
+      },
+      "declaredEntitiesFound": true,
+      "protectedByLock": true,
+      "responseProtectedByLock": true
+    },
+    {
+      "id": "RAG-12",
+      "expectedCriticalEntities": [
+        "G12",
+        "1012"
+      ],
+      "customer": {
+        "input": "I have high ping and lag in online game G12, ticket 1012.",
+        "output": "Tengo ping alto y retraso en el juego en línea G12, boleto 1012.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1012",
+            "G12"
+          ]
+        }
+      },
+      "response": {
+        "input": "Ejecute la prueba de latencia para el ticket 1012 en el juego G12.",
+        "output": "Execute the latency test for ticket 1012 in game G12.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1012",
+            "G12"
+          ]
+        }
+      },
+      "declaredEntitiesFound": true,
+      "protectedByLock": true,
+      "responseProtectedByLock": true
+    },
+    {
+      "id": "RAG-13",
+      "expectedCriticalEntities": [
+        "P13",
+        "1013"
+      ],
+      "customer": {
+        "input": "I want to upgrade plan P13 and know the price, quote 1013.",
+        "output": "Quiero actualizar el plan P13 y conocer el precio, cotización 1013.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1013",
+            "P13"
+          ]
+        }
+      },
+      "response": {
+        "input": "Ofrezca las opciones del plan P13 para la cotización 1013.",
+        "output": "Offer P13 plan options for quotation 1013.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1013",
+            "P13"
+          ]
+        }
+      },
+      "declaredEntitiesFound": true,
+      "protectedByLock": true,
+      "responseProtectedByLock": true
+    },
+    {
+      "id": "RAG-14",
+      "expectedCriticalEntities": [
+        "M14",
+        "1014"
+      ],
+      "customer": {
+        "input": "My bill has a charge for modem M14 that I returned, ticket 1014.",
+        "output": "Mi factura tiene un cargo por el módem M14 que devolví, boleto 1014.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1014",
+            "M14"
+          ]
+        }
+      },
+      "response": {
+        "input": "Revise la devolución del módem M14 en el ticket 1014.",
+        "output": "Check the M14 modem back at ticket 1014.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1014",
+            "M14"
+          ]
+        }
+      },
+      "declaredEntitiesFound": true,
+      "protectedByLock": true,
+      "responseProtectedByLock": true
+    },
+    {
+      "id": "RAG-15",
+      "expectedCriticalEntities": [
+        "E105",
+        "NEGATION",
+        "1015"
+      ],
+      "customer": {
+        "input": "Modem shows error E105 and red light does not blink, incident 1015.",
+        "output": "MÓdem muestra el error E105 y la luz roja no parpadea, incidente 1015.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1015",
+            "E105",
+            "NEGATION"
+          ]
+        }
+      },
+      "response": {
+        "input": "Confirme la luz WAN. Si E105 continúa, escale el incidente 1015.",
+        "output": "Confirm the WAN light. If E105 continues, escalate incident 1015.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1015",
+            "E105"
+          ]
+        }
+      },
+      "declaredEntitiesFound": true,
+      "protectedByLock": true,
+      "responseProtectedByLock": true
+    },
+    {
+      "id": "RAG-16",
+      "expectedCriticalEntities": [
+        "Q16",
+        "1016"
+      ],
+      "customer": {
+        "input": "Equipment Q16 is very hot and smells burned, case 1016.",
+        "output": "El equipo Q16 es muy caliente y huele quemado, caso 1016.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1016",
+            "Q16"
+          ]
+        }
+      },
+      "response": {
+        "input": "Desconecte el equipo Q16 y escale el caso 1016 por seguridad.",
+        "output": "Disconnect the Q16 equipment and scale case 1016 for safety.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1016",
+            "Q16"
+          ]
+        }
+      },
+      "declaredEntitiesFound": true,
+      "protectedByLock": true,
+      "responseProtectedByLock": true
+    },
+    {
+      "id": "RAG-17",
+      "expectedCriticalEntities": [
+        "W17",
+        "1017"
+      ],
+      "customer": {
+        "input": "Modem W17 got wet and has visible physical damage, incident 1017.",
+        "output": "Módem W17 se mojó y tiene daños físicos visibles, incidente 1017.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1017",
+            "W17"
+          ]
+        }
+      },
+      "response": {
+        "input": "No encienda el módem W17; programe revisión para el incidente 1017.",
+        "output": "Don't turn on modem W17; schedule review for incident 1017.",
+        "lock": {
+          "kind": "blocked",
+          "missing": [
+            "NEGATION"
+          ],
+          "unexpected": []
+        }
+      },
+      "declaredEntitiesFound": true,
+      "protectedByLock": true,
+      "responseProtectedByLock": true
+    },
+    {
+      "id": "RAG-18",
+      "expectedCriticalEntities": [
+        "X18",
+        "NEGATION",
+        "1018"
+      ],
+      "customer": {
+        "input": "Issue X18 is unknown and no documented procedure applies, case 1018.",
+        "output": "La emisión X18 es desconocida y no se aplica ningún procedimiento documentado, caso 1018.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1018",
+            "NEGATION",
+            "X18"
+          ]
+        }
+      },
+      "response": {
+        "input": "Escalone el caso 1018 porque no existe un procedimiento para X18.",
+        "output": "Stick case 1018 because there is no procedure for X18.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1018",
+            "NEGATION",
+            "X18"
+          ]
+        }
+      },
+      "declaredEntitiesFound": true,
+      "protectedByLock": true,
+      "responseProtectedByLock": true
+    },
+    {
+      "id": "RAG-19",
+      "expectedCriticalEntities": [
+        "2",
+        "1019"
+      ],
+      "customer": {
+        "input": "I need to buy 2 airline tickets for tomorrow, reference 1019.",
+        "output": "Necesito comprar 2 billetes de avión para mañana, referencia 1019.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1019",
+            "2"
+          ]
+        }
+      },
+      "response": {
+        "input": "No hay una respuesta empresarial aprobada para la referencia 1019.",
+        "output": "There is no approved business response for reference 1019.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1019",
+            "NEGATION"
+          ]
+        }
+      },
+      "declaredEntitiesFound": true,
+      "protectedByLock": true,
+      "responseProtectedByLock": true
+    },
+    {
+      "id": "RAG-20",
+      "expectedCriticalEntities": [
+        "20",
+        "1020"
+      ],
+      "customer": {
+        "input": "What medicine should I take for headache level 20, case 1020?",
+        "output": "¿QuÉ medicamento debo tomar para dolor de cabeza nivel 20, caso 1020?",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1020",
+            "20"
+          ]
+        }
+      },
+      "response": {
+        "input": "No hay una respuesta empresarial aprobada para el caso 1020.",
+        "output": "There is no approved business response for case 1020.",
+        "lock": {
+          "kind": "valid",
+          "entities": [
+            "1020",
+            "NEGATION"
+          ]
+        }
+      },
+      "declaredEntitiesFound": true,
+      "protectedByLock": true,
+      "responseProtectedByLock": true
+    }
+  ]
+}

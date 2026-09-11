@@ -1,21 +1,17 @@
 import { execFileSync } from "node:child_process";
-import { appendFileSync, mkdirSync, rmSync } from "node:fs";
+import { mkdirSync, rmSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
 import ffmpegPath from "ffmpeg-static";
 
 import { QvacLocalAiGateway } from "../src/infrastructure/qvac-local-ai-gateway.ts";
+import { appendJsonlArtifact } from "./artifact-writer.ts";
 
 const artifactPath = resolve("artifacts/performance/asr-smoke.jsonl");
 const sourcePath = resolve("artifacts/audio/asr-source.wav");
 const wavPath = resolve("artifacts/audio/asr-16khz.wav");
 const phrase = "My modem shows error E one zero five and the red light does not blink.";
 const gateway = new QvacLocalAiGateway();
-
-const writeRecord = (record: Record<string, unknown>): void => {
-  mkdirSync(dirname(artifactPath), { recursive: true });
-  appendFileSync(artifactPath, `${JSON.stringify(record)}\n`, "utf8");
-};
 
 try {
   if (!ffmpegPath) throw new Error("ffmpeg-static no está disponible.");
@@ -52,12 +48,12 @@ try {
     latencyMs: result.latencyMs,
     inferenceLocation: "local",
   };
-  writeRecord(record);
+  appendJsonlArtifact(artifactPath, record);
   console.log(JSON.stringify(record, null, 2));
   if (!result.text.trim()) process.exitCode = 1;
 } catch (error) {
   const message = error instanceof Error ? error.stack ?? error.message : String(error);
-  writeRecord({ recordedAt: new Date().toISOString(), component: "transcription", status: "failed", error: message });
+  appendJsonlArtifact(artifactPath, { recordedAt: new Date().toISOString(), component: "transcription", status: "failed", error: message });
   console.error(message);
   process.exitCode = 1;
 } finally {

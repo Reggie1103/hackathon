@@ -80,7 +80,7 @@ describe("customer support flow", () => {
       [],
     );
 
-    const result = await prepareCustomerResponse({ text: spanish }, gateway);
+    const result = await prepareCustomerResponse({ text: spanish }, gateway, "supported");
 
     expect(result.canConfirm).toBe(false);
     expect(result.criticalEntityState).toEqual({
@@ -97,9 +97,22 @@ describe("customer support flow", () => {
       [],
     );
 
-    const result = await prepareCustomerResponse({ text: spanish }, gateway);
+    const result = await prepareCustomerResponse({ text: spanish }, gateway, "supported");
 
     expect(result.canConfirm).toBe(true);
     expect(result.criticalEntityState.kind).toBe("valid");
+  });
+
+  it("blocks confirmation when Evidence Gate did not support the customer turn", async () => {
+    const gateway = new StubLocalAiGateway({}, []);
+    const result = await prepareCustomerResponse(
+      { text: "Confirme la luz WAN." },
+      gateway,
+      "abstained",
+    );
+
+    expect(result.criticalEntityState.kind).toBe("valid");
+    expect(result.evidenceState).toBe("blocked");
+    expect(result.canConfirm).toBe(false);
   });
 });

@@ -63,13 +63,22 @@ export interface PreparedCustomerResponse {
   customerText: string;
   translation: TranslationResult;
   criticalEntityState: CriticalEntityState;
+  evidenceState: "supported" | "blocked";
+  blockedReason?: string;
   canConfirm: boolean;
+}
+
+export interface RuntimeInfo {
+  mode: "qvac" | "demo";
+  status: "loading" | "ready" | "error";
+  disclosure: string;
+  error?: string;
 }
 
 export interface SovereignAgentApi {
   transcribeCustomerAudio(audio: ArrayBuffer): Promise<AudioTranscriptionResult>;
   processCustomerUtterance(input: { text: string }): Promise<CustomerTurnResult>;
   prepareCustomerResponse(input: { text: string }): Promise<PreparedCustomerResponse>;
-  runtimeInfo(): Promise<{ mode: "qvac" | "demo"; disclosure: string }>;
+  runtimeInfo(): Promise<RuntimeInfo>;
   closeSession(): Promise<{ clearedAt: string; retained: string[] }>;
 }

@@ -28,6 +28,13 @@ import { LocalKnowledgeIndex } from "./local-knowledge-index.ts";
 import { demoKnowledgeDocuments } from "./demo-knowledge.ts";
 
 const RAG_WORKSPACE = "qvac-sovereign-agent-v1";
+type TranslationDirection = "en-es" | "es-en";
+
+function translationDirection(from: Language, to: Language): TranslationDirection {
+  if (from === "en" && to === "es") return "en-es";
+  if (from === "es" && to === "en") return "es-en";
+  throw new Error(`Dirección de traducción no soportada: ${from}→${to}.`);
+}
 
 export class QvacLocalAiGateway implements LocalAiGateway {
   private readonly index = new LocalKnowledgeIndex();
@@ -37,12 +44,11 @@ export class QvacLocalAiGateway implements LocalAiGateway {
   private ragInitialization: Promise<void> | null = null;
 
   private async modelFor(from: Language, to: Language): Promise<string> {
-    const direction = `${from}-${to}`;
+    const direction = translationDirection(from, to);
     const cached = this.modelIds.get(direction);
     if (cached) return cached;
 
-    const modelId =
-      direction === "en-es"
+    const modelId = direction === "en-es"
         ? await loadModel({
             modelSrc: BERGAMOT_EN_ES,
             modelConfig: { engine: "Bergamot", from: "en", to: "es" },
@@ -53,6 +59,23 @@ export class QvacLocalAiGateway implements LocalAiGateway {
           });
     this.modelIds.set(direction, modelId);
     return modelId;
+  }
+
+  private async ensureAsrModel(): Promise<string> {
+    if (!this.asrModelId) {
+      this.asrModelId = await loadModel({
+        modelSrc: PARAKEET_UNIFIED_0_6B_Q4_0,
+        modelType: "parakeet-transcription",
+      });
+    }
+    return this.asrModelId;
+  }
+
+  async warmup(): Promise<void> {
+    await this.modelFor("en", "es");
+    await this.modelFor("es", "en");
+    await this.ensureRagReady();
+    await this.ensureAsrModel();
   }
 
   async translate(text: string, from: Language, to: Language): Promise<TranslationResult> {
@@ -69,14 +92,9 @@ export class QvacLocalAiGateway implements LocalAiGateway {
   }
 
   async transcribeCustomerAudio(wavPath: string): Promise<AudioTranscriptionResult> {
-    if (!this.asrModelId) {
-      this.asrModelId = await loadModel({
-        modelSrc: PARAKEET_UNIFIED_0_6B_Q4_0,
-        modelType: "parakeet-transcription",
-      });
-    }
+    const asrModelId = await this.ensureAsrModel();
     const started = performance.now();
-    const text = await transcribe({ modelId: this.asrModelId, audioChunk: wavPath });
+    const text = await transcribe({ modelId: asrModelId, audioChunk: wavPath });
     return {
       text: text.trim(),
       modelName: PARAKEET_UNIFIED_0_6B_Q4_0.name,
@@ -92,7 +110,7 @@ export class QvacLocalAiGateway implements LocalAiGateway {
       workspace: RAG_WORKSPACE,
       modelId: this.embeddingModelId,
       query,
-      topK: Math.max(limit, 3),
+      topK: Math.max(limit, 12),
     });
     const documentsById = new Map(
       demoKnowledgeDocuments.map((document) => [document.documentId, document]),
@@ -102,8 +120,7 @@ export class QvacLocalAiGateway implements LocalAiGateway {
       .flatMap((result): Evidence[] => {
         const document = documentsById.get(result.id);
         return document ? [{ ...document, score: result.score }] : [];
-      })
-      .slice(0, limit);
+      });
   }
 
   private async ensureRagReady(): Promise<void> {

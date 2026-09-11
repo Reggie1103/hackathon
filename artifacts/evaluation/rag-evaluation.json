@@ -1,5 +1,5 @@
 {
-  "recordedAt": "2026-09-11T01:51:24.503Z",
+  "recordedAt": "2026-09-11T02:16:49.839Z",
   "runtime": "@qvac/sdk@0.19.0",
   "modelName": "EMBEDDINGGEMMA_300M_Q4_0",
   "quantization": "q4_0",
@@ -11,480 +11,735 @@
   "results": [
     {
       "id": "RAG-01",
-      "query": "El internet se desconecta cada diez minutos y la luz del módem se pone roja.",
+      "customerTextEn": "My internet disconnects every 10 minutes and ticket 1001 reports a red modem light.",
+      "referenceTranslationEs": "Mi internet se desconecta cada 10 minutos y el ticket 1001 reporta una luz roja en el módem.",
+      "intent": "cortes periódicos",
+      "expectedCriticalEntities": [
+        "10",
+        "1001"
+      ],
       "expectedDocumentId": "NET-001",
+      "expectedDecision": "supported",
+      "approvedResponseEs": "Para el ticket 1001, confirme la luz roja y escale si continúa por más de 10 minutos.",
       "predictedDocumentId": "NET-001",
       "correct": true,
       "matches": [
         {
           "documentId": "NET-001",
-          "score": 0.6837019781933027,
+          "score": 0.6727786421134028,
           "status": "active"
         },
         {
           "documentId": "NET-002",
-          "score": 0.6226466922570995,
+          "score": 0.5796382330138279,
           "status": "active"
         },
         {
-          "documentId": "NET-003",
-          "score": 0.5774586550165938,
+          "documentId": "NET-011",
+          "score": 0.5329235573542023,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-004",
+          "score": 0.45239979554629167,
           "status": "active"
         }
       ]
     },
     {
       "id": "RAG-02",
-      "query": "¿Cómo reinicio el módem de forma segura sin dañar la conexión?",
+      "customerTextEn": "How do I safely restart modem model AX20 after case 1002?",
+      "referenceTranslationEs": "¿Cómo reinicio de forma segura el módem modelo AX20 después del caso 1002?",
+      "intent": "reinicio seguro",
+      "expectedCriticalEntities": [
+        "1002"
+      ],
       "expectedDocumentId": "NET-002",
+      "expectedDecision": "supported",
+      "approvedResponseEs": "Para el caso 1002, reinicie el módem AX20 siguiendo el procedimiento seguro.",
       "predictedDocumentId": "NET-002",
       "correct": true,
       "matches": [
         {
           "documentId": "NET-002",
-          "score": 0.6766942087738373,
+          "score": 0.536548314368742,
           "status": "active"
         },
         {
-          "documentId": "NET-016",
-          "score": 0.5647333285424374,
-          "status": "expired"
+          "documentId": "NET-019",
+          "score": 0.4845601012199399,
+          "status": "active"
         },
         {
-          "documentId": "NET-011",
-          "score": 0.5255901688022062,
+          "documentId": "NET-001",
+          "score": 0.4521580848439125,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-014",
+          "score": 0.4154744177761498,
           "status": "active"
         }
       ]
     },
     {
       "id": "RAG-03",
-      "query": "La luz LOS está roja y parece que el cable de fibra está flojo.",
+      "customerTextEn": "The LOS light is red and fiber cable F-03 is loose in incident 1003.",
+      "referenceTranslationEs": "La luz LOS está roja y el cable de fibra F-03 está flojo en el incidente 1003.",
+      "intent": "fibra LOS",
+      "expectedCriticalEntities": [
+        "F-03",
+        "1003"
+      ],
       "expectedDocumentId": "NET-003",
+      "expectedDecision": "supported",
+      "approvedResponseEs": "No manipule el cable F-03; programe revisión para el incidente 1003.",
       "predictedDocumentId": "NET-003",
       "correct": true,
       "matches": [
         {
           "documentId": "NET-003",
-          "score": 0.7185171171893943,
+          "score": 0.6384337901918443,
           "status": "active"
         },
         {
           "documentId": "NET-001",
-          "score": 0.5852814906036147,
+          "score": 0.553352880595012,
           "status": "active"
         },
         {
-          "documentId": "NET-016",
-          "score": 0.5317713122310378,
-          "status": "expired"
+          "documentId": "NET-015",
+          "score": 0.49099719778692513,
+          "status": "active"
         }
       ]
     },
     {
       "id": "RAG-04",
-      "query": "La señal Wi-Fi casi no llega a la habitación del fondo.",
+      "customerTextEn": "Wi-Fi signal does not reach room 4 with router R4, case 1004.",
+      "referenceTranslationEs": "La señal Wi-Fi no llega a la habitación 4 con el router R4, caso 1004.",
+      "intent": "alcance Wi-Fi",
+      "expectedCriticalEntities": [
+        "4",
+        "1004"
+      ],
       "expectedDocumentId": "NET-004",
+      "expectedDecision": "supported",
+      "approvedResponseEs": "Para el caso 1004, acerque el router R4 a la habitación 4.",
       "predictedDocumentId": "NET-004",
       "correct": true,
       "matches": [
         {
           "documentId": "NET-004",
-          "score": 0.6717608764196306,
+          "score": 0.5650559065802034,
           "status": "active"
         },
         {
           "documentId": "NET-010",
-          "score": 0.5483129468290058,
+          "score": 0.5455415644791344,
           "status": "active"
         },
         {
-          "documentId": "NET-006",
-          "score": 0.44784881109142904,
+          "documentId": "NET-015",
+          "score": 0.50062491615895,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-011",
+          "score": 0.4936201660399442,
           "status": "active"
         }
       ]
     },
     {
       "id": "RAG-05",
-      "query": "Olvidé la contraseña de mi red Wi-Fi y quiero cambiarla.",
+      "customerTextEn": "I forgot my Wi-Fi password for network 5G-1005 and need to change it.",
+      "referenceTranslationEs": "Olvidé mi contraseña Wi-Fi para la red 5G-1005 y necesito cambiarla.",
+      "intent": "credenciales Wi-Fi",
+      "expectedCriticalEntities": [
+        "1005"
+      ],
       "expectedDocumentId": "NET-005",
+      "expectedDecision": "supported",
+      "approvedResponseEs": "Verifique identidad antes de cambiar la clave de la red 5G-1005.",
       "predictedDocumentId": "NET-005",
       "correct": true,
       "matches": [
         {
           "documentId": "NET-005",
-          "score": 0.6810620168463514,
+          "score": 0.6231894114433135,
           "status": "active"
         },
         {
-          "documentId": "NET-010",
-          "score": 0.5382525219201778,
+          "documentId": "NET-015",
+          "score": 0.5348450835760536,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-001",
+          "score": 0.4608530860128352,
           "status": "active"
         },
         {
           "documentId": "NET-013",
-          "score": 0.495167082727245,
+          "score": 0.4532776729442407,
           "status": "active"
         }
       ]
     },
     {
       "id": "RAG-06",
-      "query": "Pago 500 Mbps pero la prueba por cable solo marca 80 Mbps.",
+      "customerTextEn": "I pay for 500 Mbps but wired test on ticket 1006 shows only 80 Mbps.",
+      "referenceTranslationEs": "Pago 500 Mbps pero la prueba por cable del ticket 1006 muestra solo 80 Mbps.",
+      "intent": "velocidad inferior",
+      "expectedCriticalEntities": [
+        "500",
+        "1006",
+        "80"
+      ],
       "expectedDocumentId": "NET-006",
-      "predictedDocumentId": "NET-006",
-      "correct": true,
+      "expectedDecision": "supported",
+      "approvedResponseEs": "Para el ticket 1006, mida por cable: el plan es 500 Mbps y el resultado fue 80 Mbps.",
+      "predictedDocumentId": null,
+      "correct": false,
       "matches": [
         {
-          "documentId": "NET-006",
-          "score": 0.6114818747388204,
+          "documentId": "NET-010",
+          "score": 0.4507225046446513,
           "status": "active"
         },
         {
-          "documentId": "NET-012",
-          "score": 0.3980946675048629,
+          "documentId": "NET-003",
+          "score": 0.42482063355494026,
           "status": "active"
         },
         {
-          "documentId": "NET-013",
-          "score": 0.3812923942192524,
+          "documentId": "NET-011",
+          "score": 0.38191945081821627,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-004",
+          "score": 0.3672862084305663,
           "status": "active"
         }
       ]
     },
     {
       "id": "RAG-07",
-      "query": "¿Hay mantenimiento programado hoy en mi zona?",
+      "customerTextEn": "Is scheduled maintenance planned today for zone Z-07, reference 1007?",
+      "referenceTranslationEs": "¿Hay mantenimiento programado hoy para la zona Z-07, referencia 1007?",
+      "intent": "mantenimiento",
+      "expectedCriticalEntities": [
+        "Z-07",
+        "1007"
+      ],
       "expectedDocumentId": "NET-007",
+      "expectedDecision": "supported",
+      "approvedResponseEs": "Revise el estado de la zona Z-07 para la referencia 1007.",
       "predictedDocumentId": "NET-007",
       "correct": true,
       "matches": [
         {
           "documentId": "NET-007",
-          "score": 0.6841015489338276,
-          "status": "active"
-        },
-        {
-          "documentId": "NET-009",
-          "score": 0.43700487517378356,
+          "score": 0.5471676685970182,
           "status": "active"
         },
         {
           "documentId": "NET-011",
-          "score": 0.4047177580339534,
+          "score": 0.36745399781495575,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-009",
+          "score": 0.3640777301354013,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-004",
+          "score": 0.275484974967395,
           "status": "active"
         }
       ]
     },
     {
       "id": "RAG-08",
-      "query": "Ya hicimos las pruebas remotas y necesito agendar una visita técnica.",
+      "customerTextEn": "Remote tests are complete and I need a technical visit for ticket 1008.",
+      "referenceTranslationEs": "Las pruebas remotas están completas y necesito una visita técnica para el ticket 1008.",
+      "intent": "visita técnica",
+      "expectedCriticalEntities": [
+        "1008"
+      ],
       "expectedDocumentId": "NET-008",
+      "expectedDecision": "supported",
+      "approvedResponseEs": "Agende la visita técnica para el ticket 1008.",
       "predictedDocumentId": "NET-008",
       "correct": true,
       "matches": [
         {
           "documentId": "NET-008",
-          "score": 0.6043749965400582,
+          "score": 0.5481899186232071,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-011",
+          "score": 0.4170964204018125,
           "status": "active"
         },
         {
           "documentId": "NET-017",
-          "score": 0.3808079672985034,
+          "score": 0.3600405494518814,
           "status": "draft"
         },
         {
-          "documentId": "NET-007",
-          "score": 0.36885118414803686,
+          "documentId": "NET-004",
+          "score": 0.27340010257369873,
           "status": "active"
         }
       ]
     },
     {
       "id": "RAG-09",
-      "query": "Nos quedamos sin servicio después de la tormenta y los rayos.",
+      "customerTextEn": "Service failed after a storm on circuit C-09, incident 1009.",
+      "referenceTranslationEs": "El servicio falló después de una tormenta en el circuito C-09, incidente 1009.",
+      "intent": "daño por tormenta",
+      "expectedCriticalEntities": [
+        "C-09",
+        "1009"
+      ],
       "expectedDocumentId": "NET-009",
+      "expectedDecision": "supported",
+      "approvedResponseEs": "Priorice la inspección del circuito C-09 para el incidente 1009.",
       "predictedDocumentId": "NET-009",
       "correct": true,
       "matches": [
         {
           "documentId": "NET-009",
-          "score": 0.7153860472420239,
+          "score": 0.6015848794964821,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-015",
+          "score": 0.4281869728149319,
           "status": "active"
         },
         {
           "documentId": "NET-011",
-          "score": 0.4610815797858364,
+          "score": 0.40812982419814847,
           "status": "active"
         },
         {
-          "documentId": "NET-010",
-          "score": 0.44607422755991344,
+          "documentId": "NET-004",
+          "score": 0.2870600251358808,
           "status": "active"
         }
       ]
     },
     {
       "id": "RAG-10",
-      "query": "Solo mi laptop no conecta; los demás dispositivos navegan bien.",
+      "customerTextEn": "Only laptop L10 cannot connect; the other 2 devices work, case 1010.",
+      "referenceTranslationEs": "Solo la laptop L10 no conecta; los otros 2 dispositivos funcionan, caso 1010.",
+      "intent": "un dispositivo",
+      "expectedCriticalEntities": [
+        "2",
+        "1010"
+      ],
       "expectedDocumentId": "NET-010",
+      "expectedDecision": "supported",
+      "approvedResponseEs": "Para el caso 1010, revise la conexión de la laptop L10; los otros 2 equipos sí funcionan.",
       "predictedDocumentId": "NET-010",
       "correct": true,
       "matches": [
         {
           "documentId": "NET-010",
-          "score": 0.7284304715667765,
+          "score": 0.628002297903151,
           "status": "active"
         },
         {
           "documentId": "NET-011",
-          "score": 0.5682314358869069,
+          "score": 0.5097551340405334,
           "status": "active"
         },
         {
-          "documentId": "NET-002",
-          "score": 0.41151297879986365,
+          "documentId": "NET-001",
+          "score": 0.39056375708977636,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-004",
+          "score": 0.3246727571725902,
           "status": "active"
         }
       ]
     },
     {
       "id": "RAG-11",
-      "query": "Ningún teléfono ni computadora de la casa tiene internet.",
+      "customerTextEn": "No phone or computer in house H11 has internet, incident 1011.",
+      "referenceTranslationEs": "Ningún teléfono ni computadora de la casa H11 tiene internet, incidente 1011.",
+      "intent": "sin servicio total",
+      "expectedCriticalEntities": [
+        "NEGATION",
+        "1011"
+      ],
       "expectedDocumentId": "NET-011",
-      "predictedDocumentId": "NET-010",
-      "correct": false,
+      "expectedDecision": "supported",
+      "approvedResponseEs": "Para el incidente 1011, confirme que ningún equipo de la casa H11 tiene servicio.",
+      "predictedDocumentId": "NET-011",
+      "correct": true,
       "matches": [
         {
-          "documentId": "NET-010",
-          "score": 0.5848052383806785,
+          "documentId": "NET-011",
+          "score": 0.6422167210878819,
           "status": "active"
         },
         {
-          "documentId": "NET-011",
-          "score": 0.467585657734553,
+          "documentId": "NET-010",
+          "score": 0.499590320258303,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-001",
+          "score": 0.3948829594749449,
           "status": "active"
         },
         {
           "documentId": "NET-004",
-          "score": 0.43943335645924037,
+          "score": 0.3770943663696657,
           "status": "active"
         }
       ]
     },
     {
       "id": "RAG-12",
-      "query": "Tengo ping alto y lag cuando juego en línea.",
+      "customerTextEn": "I have high ping and lag in online game G12, ticket 1012.",
+      "referenceTranslationEs": "Tengo ping alto y lag en el juego en línea G12, ticket 1012.",
+      "intent": "latencia",
+      "expectedCriticalEntities": [
+        "G12",
+        "1012"
+      ],
       "expectedDocumentId": "NET-012",
+      "expectedDecision": "supported",
+      "approvedResponseEs": "Ejecute la prueba de latencia para el ticket 1012 en el juego G12.",
       "predictedDocumentId": "NET-012",
       "correct": true,
       "matches": [
         {
           "documentId": "NET-012",
-          "score": 0.5964210542172997,
+          "score": 0.574590369700691,
           "status": "active"
         },
         {
-          "documentId": "NET-006",
-          "score": 0.3657318228798873,
+          "documentId": "NET-015",
+          "score": 0.45689614457554706,
           "status": "active"
         },
         {
           "documentId": "NET-011",
-          "score": 0.34555773095695336,
+          "score": 0.4238787335924605,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-006",
+          "score": 0.38899551813528654,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-004",
+          "score": 0.3708882805233502,
           "status": "active"
         }
       ]
     },
     {
       "id": "RAG-13",
-      "query": "Quiero cambiar mi plan por uno de mayor velocidad y conocer el precio.",
+      "customerTextEn": "I want to upgrade plan P13 and know the price, quote 1013.",
+      "referenceTranslationEs": "Quiero subir al plan P13 y conocer el precio, cotización 1013.",
+      "intent": "cambio de plan",
+      "expectedCriticalEntities": [
+        "P13",
+        "1013"
+      ],
       "expectedDocumentId": "NET-013",
-      "predictedDocumentId": "NET-013",
-      "correct": true,
+      "expectedDecision": "supported",
+      "approvedResponseEs": "Ofrezca las opciones del plan P13 para la cotización 1013.",
+      "predictedDocumentId": null,
+      "correct": false,
       "matches": [
         {
-          "documentId": "NET-013",
-          "score": 0.6989684495366335,
+          "documentId": "NET-018",
+          "score": 0.37275714746629957,
           "status": "active"
         },
         {
-          "documentId": "NET-006",
-          "score": 0.5502853562894734,
+          "documentId": "NET-007",
+          "score": 0.33259841157458003,
           "status": "active"
         },
         {
-          "documentId": "NET-012",
-          "score": 0.4333751901747934,
+          "documentId": "NET-020",
+          "score": 0.2979140742548493,
           "status": "active"
         }
       ]
     },
     {
       "id": "RAG-14",
-      "query": "Mi factura tiene un cargo por un módem que ya devolví.",
+      "customerTextEn": "My bill has a charge for modem M14 that I returned, ticket 1014.",
+      "referenceTranslationEs": "Mi factura tiene un cargo por el módem M14 que devolví, ticket 1014.",
+      "intent": "cargo de módem",
+      "expectedCriticalEntities": [
+        "M14",
+        "1014"
+      ],
       "expectedDocumentId": "NET-014",
+      "expectedDecision": "supported",
+      "approvedResponseEs": "Revise la devolución del módem M14 en el ticket 1014.",
       "predictedDocumentId": "NET-014",
       "correct": true,
       "matches": [
         {
           "documentId": "NET-014",
-          "score": 0.6528954224798911,
+          "score": 0.5533416095429489,
           "status": "active"
         },
         {
-          "documentId": "NET-002",
-          "score": 0.41909032090280035,
+          "documentId": "NET-015",
+          "score": 0.3967129573707673,
           "status": "active"
         },
         {
           "documentId": "NET-001",
-          "score": 0.39172069023402906,
+          "score": 0.386424059384168,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-019",
+          "score": 0.34726166791997665,
           "status": "active"
         }
       ]
     },
     {
       "id": "RAG-15",
-      "query": "El módem presenta el código de error E105.",
+      "customerTextEn": "Modem shows error E105 and red light does not blink, incident 1015.",
+      "referenceTranslationEs": "El módem presenta el error E105 y la luz roja no parpadea, incidente 1015.",
+      "intent": "error E105",
+      "expectedCriticalEntities": [
+        "E105",
+        "NEGATION",
+        "1015"
+      ],
       "expectedDocumentId": "NET-015",
+      "expectedDecision": "supported",
+      "approvedResponseEs": "Confirme la luz WAN. Si E105 continúa, escale el incidente 1015.",
       "predictedDocumentId": "NET-015",
       "correct": true,
       "matches": [
         {
           "documentId": "NET-015",
-          "score": 0.793798027199774,
+          "score": 0.7223795322892295,
           "status": "active"
         },
         {
           "documentId": "NET-001",
-          "score": 0.6765953882545426,
+          "score": 0.6983378381663732,
           "status": "active"
         },
         {
-          "documentId": "NET-002",
-          "score": 0.49872840901347615,
-          "status": "active"
+          "documentId": "NET-016",
+          "score": 0.5182628132134857,
+          "status": "expired"
         }
       ]
     },
     {
       "id": "RAG-16",
-      "query": "El equipo está muy caliente y huele a quemado.",
+      "customerTextEn": "Equipment Q16 is very hot and smells burned, case 1016.",
+      "referenceTranslationEs": "El equipo Q16 está muy caliente y huele a quemado, caso 1016.",
+      "intent": "seguridad eléctrica",
+      "expectedCriticalEntities": [
+        "Q16",
+        "1016"
+      ],
       "expectedDocumentId": "NET-018",
+      "expectedDecision": "supported",
+      "approvedResponseEs": "Desconecte el equipo Q16 y escale el caso 1016 por seguridad.",
       "predictedDocumentId": "NET-018",
       "correct": true,
       "matches": [
         {
           "documentId": "NET-018",
-          "score": 0.5972031628778516,
+          "score": 0.5377015440371816,
           "status": "active"
         },
         {
           "documentId": "NET-019",
-          "score": 0.4742049311428254,
+          "score": 0.4346795935680746,
           "status": "active"
         },
         {
-          "documentId": "NET-010",
-          "score": 0.4700921177925034,
+          "documentId": "NET-015",
+          "score": 0.4171136373758226,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-014",
+          "score": 0.3985073699506403,
           "status": "active"
         }
       ]
     },
     {
       "id": "RAG-17",
-      "query": "El módem se mojó y tiene daño físico visible.",
+      "customerTextEn": "Modem W17 got wet and has visible physical damage, incident 1017.",
+      "referenceTranslationEs": "El módem W17 se mojó y tiene daño físico visible, incidente 1017.",
+      "intent": "daño físico",
+      "expectedCriticalEntities": [
+        "W17",
+        "1017"
+      ],
       "expectedDocumentId": "NET-019",
-      "predictedDocumentId": null,
-      "correct": false,
+      "expectedDecision": "supported",
+      "approvedResponseEs": "No encienda el módem W17; programe revisión para el incidente 1017.",
+      "predictedDocumentId": "NET-019",
+      "correct": true,
       "matches": [
         {
-          "documentId": "NET-002",
-          "score": 0.48812409644403254,
+          "documentId": "NET-019",
+          "score": 0.5794477023455195,
           "status": "active"
         },
         {
-          "documentId": "NET-016",
-          "score": 0.44359361320097057,
-          "status": "expired"
+          "documentId": "NET-004",
+          "score": 0.4408317210709025,
+          "status": "active"
         },
         {
-          "documentId": "NET-010",
-          "score": 0.37854198387014065,
+          "documentId": "NET-014",
+          "score": 0.4382533957071245,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-011",
+          "score": 0.42465011508112654,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-009",
+          "score": 0.383599773468847,
           "status": "active"
         }
       ]
     },
     {
       "id": "RAG-18",
-      "query": "El problema es desconocido y no existe un procedimiento aplicable.",
+      "customerTextEn": "Issue X18 is unknown and no documented procedure applies, case 1018.",
+      "referenceTranslationEs": "El problema X18 es desconocido y no existe un procedimiento aplicable, caso 1018.",
+      "intent": "sin procedimiento",
+      "expectedCriticalEntities": [
+        "X18",
+        "NEGATION",
+        "1018"
+      ],
       "expectedDocumentId": "NET-020",
+      "expectedDecision": "supported",
+      "approvedResponseEs": "Escalone el caso 1018 porque no existe un procedimiento para X18.",
       "predictedDocumentId": "NET-020",
       "correct": true,
       "matches": [
         {
           "documentId": "NET-020",
-          "score": 0.589604049847816,
+          "score": 0.5902540161617704,
           "status": "active"
         },
         {
-          "documentId": "NET-016",
-          "score": 0.4055897235885031,
-          "status": "expired"
+          "documentId": "NET-015",
+          "score": 0.3754084116249007,
+          "status": "active"
         },
         {
-          "documentId": "NET-010",
-          "score": 0.3793895912170322,
-          "status": "active"
+          "documentId": "NET-017",
+          "score": 0.2909026761372003,
+          "status": "draft"
         }
       ]
     },
     {
       "id": "RAG-19",
-      "query": "Necesito comprar boletos de avión para viajar mañana.",
+      "customerTextEn": "I need to buy 2 airline tickets for tomorrow, reference 1019.",
+      "referenceTranslationEs": "Necesito comprar 2 boletos de avión para mañana, referencia 1019.",
+      "intent": "fuera de dominio vuelos",
+      "expectedCriticalEntities": [
+        "2",
+        "1019"
+      ],
       "expectedDocumentId": null,
+      "expectedDecision": "abstained",
+      "approvedResponseEs": "No hay una respuesta empresarial aprobada para la referencia 1019.",
       "predictedDocumentId": null,
       "correct": true,
       "matches": [
         {
           "documentId": "NET-013",
-          "score": 0.34681908010633256,
+          "score": 0.36408924827283373,
           "status": "active"
         },
         {
           "documentId": "NET-005",
-          "score": 0.30291965780542957,
+          "score": 0.2867259070217903,
           "status": "active"
         },
         {
-          "documentId": "NET-019",
-          "score": 0.3007523846998577,
+          "documentId": "NET-011",
+          "score": 0.2788682505293383,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-015",
+          "score": 0.2786449721171828,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-004",
+          "score": 0.23691745806848463,
           "status": "active"
         }
       ]
     },
     {
       "id": "RAG-20",
-      "query": "¿Qué medicamento debo tomar para el dolor de cabeza?",
+      "customerTextEn": "What medicine should I take for headache level 20, case 1020?",
+      "referenceTranslationEs": "¿Qué medicamento debo tomar para dolor de cabeza nivel 20, caso 1020?",
+      "intent": "fuera de dominio salud",
+      "expectedCriticalEntities": [
+        "20",
+        "1020"
+      ],
       "expectedDocumentId": null,
+      "expectedDecision": "abstained",
+      "approvedResponseEs": "No hay una respuesta empresarial aprobada para el caso 1020.",
       "predictedDocumentId": null,
       "correct": true,
       "matches": [
         {
-          "documentId": "NET-014",
-          "score": 0.36520045915831545,
-          "status": "active"
-        },
-        {
           "documentId": "NET-019",
-          "score": 0.34538333421659806,
+          "score": 0.28417184340193663,
           "status": "active"
         },
         {
-          "documentId": "NET-006",
-          "score": 0.30668651978742817,
+          "documentId": "NET-020",
+          "score": 0.2625342375541351,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-014",
+          "score": 0.2567056108961824,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-001",
+          "score": 0.2524533049704339,
           "status": "active"
         }
       ]
