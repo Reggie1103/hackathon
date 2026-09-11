@@ -137,6 +137,23 @@ describe("customer support flow", () => {
     expect(result.criticalEntityState.kind).toBe("valid");
   });
 
+  it("treats an English contraction and its Spanish translation as the same negation", async () => {
+    const original = "I don't know what is going on. I have error E105.";
+    const translated = "No sé lo que está pasando. Tengo el error E105.";
+    const gateway = new StubLocalAiGateway(
+      { [original]: translated },
+      [activeEvidence],
+    );
+
+    const result = await processCustomerUtterance(
+      { text: original, now: new Date("2026-09-10T12:00:00Z") },
+      gateway,
+    );
+
+    expect(result.kind).toBe("supported");
+    expect(result.criticalEntityState.kind).toBe("valid");
+  });
+
   it("blocks confirmation when Evidence Gate did not support the customer turn", async () => {
     const gateway = new StubLocalAiGateway({}, []);
     const result = await prepareCustomerResponse(

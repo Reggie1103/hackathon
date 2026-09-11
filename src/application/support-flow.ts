@@ -33,7 +33,7 @@ const CUSTOMER_RESPONSE_TEMPLATES: Record<string, string> = {
 };
 
 const CODE_OR_NUMBER = /\b(?:[A-Za-z]{1,6}-?\d{2,}|\d+(?:[.,]\d+)?)\b/g;
-const NEGATION_EN = /\b(?:no|not|never|without)\b/i;
+const NEGATION_EN = /\b(?:no|not|never|without|cannot|don't|doesn't|isn't|aren't|can't|won't|wouldn't|shouldn't|couldn't|didn't|haven't|hasn't|hadn't)\b/i;
 const NEGATION_ES = /\b(?:no|nunca|jamás|sin)\b/i;
 
 export function extractCriticalEntities(text: string): string[] {
