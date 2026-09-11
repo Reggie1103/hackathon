@@ -602,22 +602,24 @@ Las entrevistas deben investigar:
 - Hardware disponible por puesto.
 - Calidad y propiedad de la base documental.
 
-## 23. Decisiones abiertas para el Main Flow
+## 23. Decisiones del Main Flow
 
-`grill-with-docs` debe resolver:
+El diseño se cerró con las siguientes decisiones:
 
-1. Dispositivo exacto para la demo.
-2. Modelo de ASR y forma de capturar el audio.
-3. Identificador, formato y cuantización de TranslatePsy.
-4. Modelo local para generar la guía.
-5. Idioma de la base de conocimiento.
-6. Umbral de Evidence Gate.
-7. Lista de entidades protegidas por Critical Data Lock.
-8. Necesidad real de TTS.
-9. Política de retención.
-10. Dataset y persona responsable de evaluar traducciones.
-11. Umbrales de latencia y calidad.
-12. Nombre final del producto.
+1. La demo se ejecutará en un HP Victus con Windows 11, Intel i5-12450H, 16 GB de RAM y NVIDIA RTX 3050 Laptop de 4 GB. El equipo dispone de Vulkan 1.4 y 77.8 GB libres.
+2. El MVP transcribirá únicamente la voz en inglés del cliente. La primera versión aceptará audio grabado y después añadirá micrófono con detección de fin de turno. No intentará separar interlocutores desde un canal mixto.
+3. TranslatePsy-EuroNano ejecutará inglés → español y español → inglés. El formato, variante y cuantización exactos se seleccionarán mediante una prueba real de carga, latencia y calidad en el hardware objetivo.
+4. La guía será extractiva primero: presentará fragmentos recuperados y una síntesis breve vinculada a citas. La interfaz seguirá siendo útil si el modelo generativo no está disponible.
+5. Los documentos de conocimiento estarán en español. La consulta del cliente se traducirá al español antes de la recuperación.
+6. Evidence Gate solo permitirá `Supported Guidance` cuando exista al menos un fragmento vigente y autorizado por encima del umbral calibrado con el dataset. De lo contrario emitirá `Abstention` y una opción de escalación.
+7. Critical Data Lock protegerá códigos, números, fechas, horas, cantidades, monedas, identificadores, modelos de equipo y negaciones. Una diferencia bloqueará la respuesta hasta revisión del agente.
+8. La respuesta de texto en inglés es obligatoria. La síntesis de voz es una mejora posterior.
+9. Zero-Retention Mode eliminará audio, transcripciones y traducciones al cerrar la sesión. Solo conservará métricas agregadas y la categoría anónima del problema.
+10. El repositorio incluirá 20 documentos ficticios y 20 casos bilingües, con respuestas, documentos correctos, entidades y resultado esperado revisables.
+11. Objetivos iniciales: `Precision@1` de al menos 85 %, 100 % de entidades críticas conservadas o bloqueadas, evidencia visible en menos de tres segundos tras una intervención estable y flujo completo sin APIs externas de IA.
+12. El nombre de trabajo es **QVAC Sovereign Agent**.
+
+La frontera pública para pruebas será el flujo de aplicación que procesa una intervención estable y devuelve estados visibles para el agente. Las pruebas usarán un adaptador local determinista en lugar de inspeccionar componentes internos de QVAC. Una prueba de humo separada verificará el SDK y los modelos reales.
 
 ## 24. Criterio de salida del hackathon
 
@@ -632,4 +634,3 @@ El proyecto estará listo cuando otra persona pueda:
 7. Reproducir los casos de evaluación.
 8. Confirmar que no se utilizó una API externa para la inferencia principal.
 9. Obtener el registro estructurado de rendimiento.
-
