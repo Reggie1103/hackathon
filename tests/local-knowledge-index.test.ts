@@ -18,4 +18,23 @@ describe("local lexical evidence", () => {
     const results = new LocalKnowledgeIndex().search("Tengo un problema con el módem.", 5);
     expect(results.every((item) => item.score < 0.5)).toBe(true);
   });
+
+  it("prioritizes a known error code even when the customer uses generic wording", () => {
+    const results = new LocalKnowledgeIndex().search(
+      "Can you help me with my computer? I think I have error E105.",
+      3,
+    );
+
+    expect(results[0]?.documentId).toBe("NET-015");
+    expect(results[0]?.score).toBeGreaterThanOrEqual(0.9);
+  });
+
+  it("recognizes an error code spoken digit by digit", () => {
+    const results = new LocalKnowledgeIndex().search(
+      "Please help. The screen says E one zero five.",
+      3,
+    );
+
+    expect(results[0]?.documentId).toBe("NET-015");
+  });
 });
