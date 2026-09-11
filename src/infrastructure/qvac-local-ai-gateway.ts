@@ -26,6 +26,7 @@ import type {
 } from "../shared/contracts.ts";
 import { LocalKnowledgeIndex } from "./local-knowledge-index.ts";
 import { demoKnowledgeDocuments } from "./demo-knowledge.ts";
+import { combineEvidenceRankings } from "./evidence-ranking.ts";
 
 const RAG_WORKSPACE = "qvac-sovereign-agent-v1";
 type TranslationDirection = "en-es" | "es-en";
@@ -116,11 +117,13 @@ export class QvacLocalAiGateway implements LocalAiGateway {
       demoKnowledgeDocuments.map((document) => [document.documentId, document]),
     );
 
-    return results
+    const semanticEvidence = results
       .flatMap((result): Evidence[] => {
         const document = documentsById.get(result.id);
         return document ? [{ ...document, score: result.score }] : [];
       });
+    const lexicalEvidence = this.index.search(query, limit);
+    return combineEvidenceRankings(semanticEvidence, lexicalEvidence, limit);
   }
 
   private async ensureRagReady(): Promise<void> {

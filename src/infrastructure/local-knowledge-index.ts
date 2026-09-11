@@ -4,13 +4,19 @@ import {
   type DemoKnowledgeDocument,
 } from "./demo-knowledge.ts";
 
+const STOP_WORDS = new Set([
+  "con", "del", "desde", "el", "ella", "en", "este", "esta", "las", "los", "para", "pero",
+  "por", "que", "sin", "sus", "una", "uno", "unos", "unas", "the", "and", "for", "from", "with",
+]);
+
 const normalize = (value: string): string[] =>
   value
+    .replace(/\bwi[\s-]?fi\b/gi, "wifi")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .split(/[^a-z0-9]+/)
-    .filter((token) => token.length > 2);
+    .filter((token) => token.length > 2 && !STOP_WORDS.has(token));
 
 export class LocalKnowledgeIndex {
   private readonly documents: DemoKnowledgeDocument[];
@@ -27,7 +33,10 @@ export class LocalKnowledgeIndex {
         const searchable = normalize(`${document.title} ${document.keywords.join(" ")} ${document.excerpt}`);
         const matches = searchable.filter((token) => queryTokens.has(token));
         const uniqueMatches = new Set(matches).size;
-        const score = Math.min(0.99, uniqueMatches === 0 ? 0 : 0.58 + uniqueMatches * 0.1);
+        const score = Math.min(
+          0.99,
+          uniqueMatches === 0 ? 0 : uniqueMatches === 1 ? 0.45 : 0.48 + uniqueMatches * 0.1,
+        );
         return { ...document, score } satisfies Evidence;
       })
       .filter((document) => document.score > 0)
