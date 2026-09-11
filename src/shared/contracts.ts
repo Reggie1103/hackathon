@@ -36,6 +36,7 @@ export interface GuidanceStep {
 export interface SupportedGuidance {
   summary: string;
   steps: GuidanceStep[];
+  customerDraft: string;
 }
 
 export type CriticalEntityState =

@@ -56,6 +56,40 @@ describe("customer support flow", () => {
     expect(result.translatedText).toBe(translated);
     expect(result.evidence).toEqual([activeEvidence]);
     expect(result.guidance?.steps[0]?.sourceDocumentId).toBe("NET-001");
+    expect(result.guidance?.customerDraft).toContain("luz roja permanece encendida o parpadea");
+  });
+
+  it("does not mix weaker tangential evidence into Supported Guidance", async () => {
+    const original = "I forgot my Wi-Fi password.";
+    const translated = "Olvidé mi contraseña Wi-Fi.";
+    const passwordEvidence: Evidence = {
+      ...activeEvidence,
+      documentId: "NET-005",
+      title: "Credenciales de la red Wi-Fi",
+      score: 0.56,
+      excerpt: "Valide la identidad antes de cambiar la contraseña.",
+    };
+    const restartEvidence: Evidence = {
+      ...activeEvidence,
+      documentId: "NET-002",
+      title: "Reinicio seguro del módem",
+      score: 0.5,
+      excerpt: "Desconecte la energía durante 30 segundos.",
+    };
+    const gateway = new StubLocalAiGateway(
+      { [original]: translated },
+      [passwordEvidence, restartEvidence],
+    );
+
+    const result = await processCustomerUtterance(
+      { text: original, now: new Date("2026-09-10T12:00:00Z") },
+      gateway,
+    );
+
+    expect(result.kind).toBe("supported");
+    expect(result.evidence.map((item) => item.documentId)).toEqual(["NET-005"]);
+    expect(result.guidance?.customerDraft).toContain("cambiar la contraseña de su Wi-Fi");
+    expect(result.guidance?.customerDraft).not.toContain("30 segundos");
   });
 
   it("returns Abstention when the only matching document is expired", async () => {

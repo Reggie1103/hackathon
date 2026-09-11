@@ -11,8 +11,7 @@ const SAMPLE =
 
 function buildEvidenceDraft(turn: CustomerTurnResult): string {
   if (turn.kind !== "supported" || !turn.guidance) return "";
-  const steps = turn.guidance.steps.slice(0, 2).map((step) => step.text).join(" ");
-  return `Gracias por informarnos. ${steps}`;
+  return turn.guidance.customerDraft;
 }
 
 export function App() {
