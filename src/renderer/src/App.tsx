@@ -169,11 +169,15 @@ export function App() {
   return (
     <main>
       <header className="topbar">
-        <div className="brand-mark">QV</div>
-        <div>
-          <p className="eyebrow">PRIVATE EDGE INTELLIGENCE</p>
-          <h1>QVAC Sovereign Agent</h1>
+        <div className="brand-lockup">
+          <div className="brand-mark">QV</div>
+          <strong>QVAC</strong>
+          <span>Sovereign Agent</span>
         </div>
+        <label className="global-search" aria-label="Buscar en la base de conocimiento">
+          <span>⌕</span>
+          <input placeholder="Buscar caso, código o documento" />
+        </label>
         <div className={`runtime ${runtime?.mode ?? "loading"} ${runtime?.status ?? "loading"}`}>
           <span className="pulse" />
           {!runtime || runtime.status === "loading"
@@ -184,9 +188,24 @@ export function App() {
         </div>
       </header>
 
-      <section className="trust-strip">
-        <strong>EN → ES → EVIDENCE → ES → EN</strong>
-        <span>{runtime?.disclosure ?? "Verificando el runtime local…"}</span>
+      <nav className="product-nav" aria-label="Navegación del producto">
+        <span className="active">Atención en vivo</span>
+        <span>Base de conocimiento</span>
+        <span>Evaluaciones</span>
+        <span>Métricas locales</span>
+        <span>Configuración</span>
+      </nav>
+
+      <section className="workflow-intro">
+        <div>
+          <p className="eyebrow">PRIVATE EDGE INTELLIGENCE</p>
+          <h1>Atención bilingüe, con evidencia.</h1>
+          <p>Entiende al cliente en inglés, trabaja en español y confirma cada respuesta con conocimiento vigente de la empresa.</p>
+        </div>
+        <div className="flow-summary">
+          <strong>EN → ES → EVIDENCE → ES → EN</strong>
+          <span>{runtime?.disclosure ?? "Verificando el runtime local…"}</span>
+        </div>
       </section>
 
       {error && <div className="error-banner">{error}</div>}
