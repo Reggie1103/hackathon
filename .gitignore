@@ -1,3 +1,11 @@
 # Repository-local development tools
 .tools/
 
+# Node and build output
+node_modules/
+out/
+dist-types/
+*.tsbuildinfo
+
+# Runtime scratch data
+.qvac/

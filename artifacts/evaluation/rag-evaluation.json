@@ -1,0 +1,493 @@
+{
+  "recordedAt": "2026-09-11T01:51:24.503Z",
+  "runtime": "@qvac/sdk@0.19.0",
+  "modelName": "EMBEDDINGGEMMA_300M_Q4_0",
+  "quantization": "q4_0",
+  "evidenceThreshold": 0.5,
+  "caseCount": 20,
+  "precisionAt1": 0.8888888888888888,
+  "abstentionAccuracy": 1,
+  "passedTarget": true,
+  "results": [
+    {
+      "id": "RAG-01",
+      "query": "El internet se desconecta cada diez minutos y la luz del módem se pone roja.",
+      "expectedDocumentId": "NET-001",
+      "predictedDocumentId": "NET-001",
+      "correct": true,
+      "matches": [
+        {
+          "documentId": "NET-001",
+          "score": 0.6837019781933027,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-002",
+          "score": 0.6226466922570995,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-003",
+          "score": 0.5774586550165938,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "RAG-02",
+      "query": "¿Cómo reinicio el módem de forma segura sin dañar la conexión?",
+      "expectedDocumentId": "NET-002",
+      "predictedDocumentId": "NET-002",
+      "correct": true,
+      "matches": [
+        {
+          "documentId": "NET-002",
+          "score": 0.6766942087738373,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-016",
+          "score": 0.5647333285424374,
+          "status": "expired"
+        },
+        {
+          "documentId": "NET-011",
+          "score": 0.5255901688022062,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "RAG-03",
+      "query": "La luz LOS está roja y parece que el cable de fibra está flojo.",
+      "expectedDocumentId": "NET-003",
+      "predictedDocumentId": "NET-003",
+      "correct": true,
+      "matches": [
+        {
+          "documentId": "NET-003",
+          "score": 0.7185171171893943,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-001",
+          "score": 0.5852814906036147,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-016",
+          "score": 0.5317713122310378,
+          "status": "expired"
+        }
+      ]
+    },
+    {
+      "id": "RAG-04",
+      "query": "La señal Wi-Fi casi no llega a la habitación del fondo.",
+      "expectedDocumentId": "NET-004",
+      "predictedDocumentId": "NET-004",
+      "correct": true,
+      "matches": [
+        {
+          "documentId": "NET-004",
+          "score": 0.6717608764196306,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-010",
+          "score": 0.5483129468290058,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-006",
+          "score": 0.44784881109142904,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "RAG-05",
+      "query": "Olvidé la contraseña de mi red Wi-Fi y quiero cambiarla.",
+      "expectedDocumentId": "NET-005",
+      "predictedDocumentId": "NET-005",
+      "correct": true,
+      "matches": [
+        {
+          "documentId": "NET-005",
+          "score": 0.6810620168463514,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-010",
+          "score": 0.5382525219201778,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-013",
+          "score": 0.495167082727245,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "RAG-06",
+      "query": "Pago 500 Mbps pero la prueba por cable solo marca 80 Mbps.",
+      "expectedDocumentId": "NET-006",
+      "predictedDocumentId": "NET-006",
+      "correct": true,
+      "matches": [
+        {
+          "documentId": "NET-006",
+          "score": 0.6114818747388204,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-012",
+          "score": 0.3980946675048629,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-013",
+          "score": 0.3812923942192524,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "RAG-07",
+      "query": "¿Hay mantenimiento programado hoy en mi zona?",
+      "expectedDocumentId": "NET-007",
+      "predictedDocumentId": "NET-007",
+      "correct": true,
+      "matches": [
+        {
+          "documentId": "NET-007",
+          "score": 0.6841015489338276,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-009",
+          "score": 0.43700487517378356,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-011",
+          "score": 0.4047177580339534,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "RAG-08",
+      "query": "Ya hicimos las pruebas remotas y necesito agendar una visita técnica.",
+      "expectedDocumentId": "NET-008",
+      "predictedDocumentId": "NET-008",
+      "correct": true,
+      "matches": [
+        {
+          "documentId": "NET-008",
+          "score": 0.6043749965400582,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-017",
+          "score": 0.3808079672985034,
+          "status": "draft"
+        },
+        {
+          "documentId": "NET-007",
+          "score": 0.36885118414803686,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "RAG-09",
+      "query": "Nos quedamos sin servicio después de la tormenta y los rayos.",
+      "expectedDocumentId": "NET-009",
+      "predictedDocumentId": "NET-009",
+      "correct": true,
+      "matches": [
+        {
+          "documentId": "NET-009",
+          "score": 0.7153860472420239,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-011",
+          "score": 0.4610815797858364,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-010",
+          "score": 0.44607422755991344,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "RAG-10",
+      "query": "Solo mi laptop no conecta; los demás dispositivos navegan bien.",
+      "expectedDocumentId": "NET-010",
+      "predictedDocumentId": "NET-010",
+      "correct": true,
+      "matches": [
+        {
+          "documentId": "NET-010",
+          "score": 0.7284304715667765,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-011",
+          "score": 0.5682314358869069,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-002",
+          "score": 0.41151297879986365,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "RAG-11",
+      "query": "Ningún teléfono ni computadora de la casa tiene internet.",
+      "expectedDocumentId": "NET-011",
+      "predictedDocumentId": "NET-010",
+      "correct": false,
+      "matches": [
+        {
+          "documentId": "NET-010",
+          "score": 0.5848052383806785,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-011",
+          "score": 0.467585657734553,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-004",
+          "score": 0.43943335645924037,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "RAG-12",
+      "query": "Tengo ping alto y lag cuando juego en línea.",
+      "expectedDocumentId": "NET-012",
+      "predictedDocumentId": "NET-012",
+      "correct": true,
+      "matches": [
+        {
+          "documentId": "NET-012",
+          "score": 0.5964210542172997,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-006",
+          "score": 0.3657318228798873,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-011",
+          "score": 0.34555773095695336,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "RAG-13",
+      "query": "Quiero cambiar mi plan por uno de mayor velocidad y conocer el precio.",
+      "expectedDocumentId": "NET-013",
+      "predictedDocumentId": "NET-013",
+      "correct": true,
+      "matches": [
+        {
+          "documentId": "NET-013",
+          "score": 0.6989684495366335,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-006",
+          "score": 0.5502853562894734,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-012",
+          "score": 0.4333751901747934,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "RAG-14",
+      "query": "Mi factura tiene un cargo por un módem que ya devolví.",
+      "expectedDocumentId": "NET-014",
+      "predictedDocumentId": "NET-014",
+      "correct": true,
+      "matches": [
+        {
+          "documentId": "NET-014",
+          "score": 0.6528954224798911,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-002",
+          "score": 0.41909032090280035,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-001",
+          "score": 0.39172069023402906,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "RAG-15",
+      "query": "El módem presenta el código de error E105.",
+      "expectedDocumentId": "NET-015",
+      "predictedDocumentId": "NET-015",
+      "correct": true,
+      "matches": [
+        {
+          "documentId": "NET-015",
+          "score": 0.793798027199774,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-001",
+          "score": 0.6765953882545426,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-002",
+          "score": 0.49872840901347615,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "RAG-16",
+      "query": "El equipo está muy caliente y huele a quemado.",
+      "expectedDocumentId": "NET-018",
+      "predictedDocumentId": "NET-018",
+      "correct": true,
+      "matches": [
+        {
+          "documentId": "NET-018",
+          "score": 0.5972031628778516,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-019",
+          "score": 0.4742049311428254,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-010",
+          "score": 0.4700921177925034,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "RAG-17",
+      "query": "El módem se mojó y tiene daño físico visible.",
+      "expectedDocumentId": "NET-019",
+      "predictedDocumentId": null,
+      "correct": false,
+      "matches": [
+        {
+          "documentId": "NET-002",
+          "score": 0.48812409644403254,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-016",
+          "score": 0.44359361320097057,
+          "status": "expired"
+        },
+        {
+          "documentId": "NET-010",
+          "score": 0.37854198387014065,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "RAG-18",
+      "query": "El problema es desconocido y no existe un procedimiento aplicable.",
+      "expectedDocumentId": "NET-020",
+      "predictedDocumentId": "NET-020",
+      "correct": true,
+      "matches": [
+        {
+          "documentId": "NET-020",
+          "score": 0.589604049847816,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-016",
+          "score": 0.4055897235885031,
+          "status": "expired"
+        },
+        {
+          "documentId": "NET-010",
+          "score": 0.3793895912170322,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "RAG-19",
+      "query": "Necesito comprar boletos de avión para viajar mañana.",
+      "expectedDocumentId": null,
+      "predictedDocumentId": null,
+      "correct": true,
+      "matches": [
+        {
+          "documentId": "NET-013",
+          "score": 0.34681908010633256,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-005",
+          "score": 0.30291965780542957,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-019",
+          "score": 0.3007523846998577,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "RAG-20",
+      "query": "¿Qué medicamento debo tomar para el dolor de cabeza?",
+      "expectedDocumentId": null,
+      "predictedDocumentId": null,
+      "correct": true,
+      "matches": [
+        {
+          "documentId": "NET-014",
+          "score": 0.36520045915831545,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-019",
+          "score": 0.34538333421659806,
+          "status": "active"
+        },
+        {
+          "documentId": "NET-006",
+          "score": 0.30668651978742817,
+          "status": "active"
+        }
+      ]
+    }
+  ]
+}

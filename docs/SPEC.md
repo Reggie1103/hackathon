@@ -180,15 +180,15 @@ También se registrarán carga de modelo, prompt o entrada, conteo de tokens cua
 - 77.8 GB libres durante la verificación.
 - `ffmpeg` pendiente de instalación antes del tramo de micrófono.
 
-## Decisiones pendientes de verificación técnica
+## Decisiones verificadas en el hardware
 
-- Variante y paquetes exactos de TranslatePsy-EuroNano.
-- Modelo ASR que entregue mejor latencia/calidad en esta máquina.
-- Modelo de embeddings disponible y suficientemente pequeño.
-- Conveniencia de un modelo generativo local frente a plantilla extractiva para el primer demo.
-- Umbral numérico de Evidence Gate calibrado con los 20 casos.
+- Traducción: `BERGAMOT_EN_ES` y `BERGAMOT_ES_EN`, paquetes INTGEMM expuestos por `@qvac/sdk` 0.19.0.
+- ASR: `PARAKEET_UNIFIED_0_6B_Q4_0`, GGUF Q4_0 de 395,029,120 bytes.
+- Embeddings: `EMBEDDINGGEMMA_300M_Q4_0`, GGUF Q4_0 de 277,852,192 bytes.
+- Guía del MVP: plantilla extractiva con citas; no se carga un LLM generativo.
+- Evidence Gate: umbral 0.50, calibrado con 18 casos empresariales y dos fuera del dominio.
 
-Estas decisiones no cambian el comportamiento del producto. El primer ticket las resolverá con evidencia del hardware y registrará los identificadores honestos en el repositorio.
+La evidencia reproducible está documentada en `docs/PERFORMANCE.md` y `artifacts/`.
 
 ## Definición de terminado
 

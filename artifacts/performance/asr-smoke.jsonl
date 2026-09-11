@@ -1,0 +1,1 @@
+{"recordedAt":"2026-09-11T01:49:14.723Z","component":"transcription","runtime":"@qvac/sdk@0.19.0","modelName":"PARAKEET_UNIFIED_0_6B_Q4_0","quantization":"q4_0","syntheticReference":"My modem shows error E one zero five and the red light does not blink.","transcript":"My modem shows error E105 and the red light does not blink.","latencyMs":890,"inferenceLocation":"local"}
